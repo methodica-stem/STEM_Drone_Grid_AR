@@ -1,0 +1,1377 @@
+/* ===================================================================
+   styles.css — lomda stylesheet (starter from the stem-lomda-builder skill)
+
+   Fixed 1920x1080 stage, scaled to the window by script.js. Every left /
+   top / width / height below is a real PSD pixel: read it from the PSD
+   inventory, do not eyeball it.
+
+   Sections:
+     1. Design tokens — the only part to change for a new design
+     2. Fonts, base, stage
+     3. Shared parts — navigation, buttons, panels, feedback, stepper
+     4. Screen types — video, tiles, questions, drag and drop, applets
+     5. Per-screen positions — one block per screen, at the end
+   =================================================================== */
+
+/* ---------- 1. Design tokens ---------- */
+:root {
+  /* From map_stem_0610.psd (רחפן רשת). */
+  --subject-500: #000000;        /* question titles: black, bold */
+  --subject-600: #1D4E8F;
+  --accent: #2F6DB5;             /* stepper pills, focus, selected rows */
+  --text: #000000;
+  --panel-bg: #FCFCFC;           /* the white hand-drawn panel (part of bg-question.jpg) */
+  --panel-border: #111010;
+  --paper: #F3EBD8;              /* the paper card behind tables */
+  --paper-line: #4E5A3E;
+  --table-head: #D9DCC7;
+  --btn-bg: #242424;             /* chalkboard buttons: "צדקתי?", "עזרה", arrows */
+  --btn-text: #FFFFFF;
+  --fb-bg: rgba(28, 28, 30, .88); /* feedback box */
+  --fb-text: #FCFCFC;
+  --fb-correct: #3EA34A;         /* "צדקת!" */
+  --fb-wrong: #FF4D4D;           /* retry / wrong — red (developer's decision 2026-10-21; a touch lighter than the PSD's #DD1D1D so it reads on the dark box) */
+  --popup-bg: #FBF2C9;           /* help popup paper */
+  --cond-text: #2F4627;          /* the conditions card */
+  --opt-correct: #2E8B3C;
+  --opt-wrong: #ca433d;          /* only on the final reveal */
+  --chip-bg: #156082;
+  --chip-text: #ffffff;
+  --term-color: #4D90D8;
+  --font-main: 'Assistant';      /* one family name for the whole lomda (the Arabic build swaps it in one place) */
+  --text-size: 40px;             /* body text on question screens (PSD 33.3, enlarged on SME request 2026-10-29 with the bigger white panel) */
+  --fb-size: 34px;               /* feedback text (PSD 26.7; 30 on 2026-10-21; 34 on 2026-10-29) */
+  --fb-title-size: 46px;         /* feedback headers: צדקת! / זו טעות */
+  --focus: 3px solid #299FD4;
+}
+
+/* ---------- 2. Fonts, base, stage ---------- */
+/* Fonts ship with the lomda (assets/fonts); nothing loads from the internet. */
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-ExtraLight.ttf') format('truetype'); font-weight: 200; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-Light.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-Medium.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Assistant'; src: url('assets/fonts/Assistant-ExtraBold.ttf') format('truetype'); font-weight: 800; font-display: swap; }
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  overflow: hidden;
+  direction: rtl;
+  font-family: var(--font-main), sans-serif;
+  background: #000;
+  color: var(--text);
+}
+button, input, select, textarea { font-family: inherit; }
+
+#app {
+  position: absolute; top: 0; left: 0;
+  width: 1920px; height: 1080px;
+  transform-origin: top left;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+.screen {
+  display: none;
+  position: absolute; inset: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+}
+.screen.active { display: block; }
+.screen:focus { outline: none; }
+
+.screen-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none; user-select: none;
+}
+/* Stand-in until the real background is exported from the PSD. */
+.bg-placeholder { background: linear-gradient(160deg, #3d5a73, #1b2a38); }
+
+.hidden { display: none !important; }
+[onclick], [role="button"], [data-action] { cursor: pointer; }
+:focus-visible { outline: var(--focus); outline-offset: 3px; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+/* Numbers, units and symbols keep their own order inside Hebrew text:
+   <span class="ltr">120°C</span> */
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+/* ---------- 3. Shared parts ---------- */
+/* Navigation. RTL: forward is on the LEFT, back on the RIGHT.
+   Replace the CSS arrows with the PSD's exported buttons:
+   .nav-next { background: url('assets/images/ui-btn-next.png') center / contain no-repeat; } */
+/* PSD: round chalkboard buttons, 128px, at 13,925 (forward) and 1768,925 (back).
+   CSS-drawn until ui-btn-next.png / ui-btn-back.png are exported (batch 1). */
+.nav-btn {
+  position: absolute; top: 925px;
+  width: 128px; height: 128px;
+  border: 5px solid #fff; border-radius: 50%;
+  background: var(--btn-bg);
+  box-shadow: 0 0 0 7px var(--btn-bg), 0 6px 14px rgba(0,0,0,.55);
+  cursor: pointer; padding: 0;
+  z-index: 15;
+}
+.nav-btn::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 30px; height: 30px;
+  border-top: 9px solid #fff; border-left: 9px solid #fff;
+}
+.nav-next { left: 13px; }
+.nav-next::before { transform: translate(-30%, -50%) rotate(-45deg); }
+.nav-prev { right: 24px; }
+.nav-prev::before { transform: translate(-70%, -50%) rotate(135deg); }
+.nav-btn:hover { filter: brightness(1.08); }
+.nav-btn.blink { animation: blinkArrow 1.1s infinite; }
+@keyframes blinkArrow { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+.btn-primary {
+  position: absolute;
+  min-width: 260px; height: 88px; padding: 0 40px;
+  border: none; border-radius: 22px;
+  background: var(--btn-bg); color: var(--btn-text);
+  font-size: 40px; font-weight: 800;
+  cursor: pointer; z-index: 12;
+}
+.btn-primary:hover { filter: brightness(1.15); }
+
+/* The check button stays hidden until there is something to check — never
+   shown faded. The disabled attribute alone hides it, so the page is right
+   even before script.js runs. */
+/* PSD: a chalkboard, 187x115 at 247,758, label 42.4px bold white.
+   CSS-drawn until ui-btn-check.png is exported (batch 1). */
+.btn-check {
+  position: absolute; left: 247px; top: 758px;
+  min-width: 187px; height: 115px; padding: 0 22px;
+  border: 4px solid #fff; border-radius: 16px;
+  background: var(--btn-bg); color: var(--btn-text);
+  box-shadow: 0 0 0 6px var(--btn-bg), 0 6px 14px rgba(0,0,0,.45);
+  font-size: 42.4px; font-weight: 700;
+  cursor: pointer; z-index: 12;
+}
+/* A round chalkboard button: "עזרה" (top left of every question) and "יישומון". */
+.help-btn, .applet-btn {
+  position: absolute; left: 55px; top: 32px; z-index: 12;
+  width: 120px; height: 120px; padding: 0;
+  border: 4px solid #fff; border-radius: 50%;
+  background: var(--btn-bg); color: #fff;
+  box-shadow: 0 0 0 6px var(--btn-bg), 0 5px 12px rgba(0,0,0,.5);
+  font-size: 36px; font-weight: 700; line-height: 1;
+  cursor: pointer;
+}
+.help-btn:hover, .applet-btn:hover { filter: brightness(1.25); }
+.applet-btn { left: 179px; font-size: 30px; }
+.applet-btn.blink { animation: blinkArrow 1.1s infinite; }
+.btn-check:disabled { display: none; }
+.btn-check:hover { filter: brightness(1.15); }
+
+/* Narration banner at the top of a screen (the storyboard's banner shape). */
+.narration-banner {
+  position: absolute; top: 0; right: 360px; left: 360px;
+  padding: 18px 40px;
+  background: #FFF8E6; border: 3px solid var(--panel-border); border-top: none;
+  border-radius: 0 0 36px 36px;
+  font-size: 32px; font-weight: 600; line-height: 1.45;
+  z-index: 6;
+}
+.narration-banner p { margin: 0; }
+
+.text-panel {
+  position: absolute; top: 160px; right: 160px; width: 900px;
+  padding: 36px 44px;
+  background: rgba(255,255,255,.95); border-radius: 30px;
+  font-size: var(--text-size); font-weight: 600; line-height: 1.6;
+}
+.text-panel p { margin: 0 0 12px; }
+
+/* Question screens: the white hand-drawn panel is part of bg-question.jpg
+   (1618x802 at 151,139), so the card itself is only a text block placed on it. */
+.q-overlay { position: absolute; inset: 0; background: rgba(35,35,35,.6); }
+.q-card {
+  position: absolute; top: 150px; right: 120px; width: 1060px;
+  overflow: visible;
+}
+.q-title { margin: 0 0 10px; font-size: var(--text-size); font-weight: 700; color: var(--subject-500); }
+.q-body, .q-instruction { margin: 0; font-size: var(--text-size); font-weight: 600; line-height: 1.22; }
+.q-body strong { font-weight: 700; }
+.q-instruction { margin-bottom: 18px; }
+
+/* Feedback popup — one for the whole lomda, outside every screen. Long
+   text grows UPWARD (anchored at the bottom), so keep it clear of the top
+   of the stage. Move it per screen with #feedback-popup.fb-<sid>. */
+#feedback-popup {
+  position: absolute; left: 196px; bottom: 181px;
+  width: 870px;
+  padding: 22px 34px;
+  background: var(--fb-bg); color: var(--fb-text);
+  border-radius: 30px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.35);
+  z-index: 200;
+  display: none;
+}
+#feedback-popup.show { display: block; }
+#feedback-popup:focus { outline: none; }
+.fb-title-row { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; }
+.fb-title { font-size: var(--fb-title-size); font-weight: 800; line-height: 1.25; }
+.fb-title .fb-rest { color: var(--fb-text); font-weight: 700; }   /* "בואו נלמד מזה" stays white; only "זו טעות" is red */
+#feedback-popup.correct .fb-title { color: var(--fb-correct); }
+#feedback-popup.retry .fb-title, #feedback-popup.retryPartial .fb-title,
+#feedback-popup.partial .fb-title, #feedback-popup.wrong2 .fb-title { color: var(--fb-wrong); }
+/* The icon is never the only signal — the title says the outcome in words. */
+.fb-icon { display: none; width: 46px; height: 46px; flex: 0 0 auto; background: center / contain no-repeat; }
+#feedback-popup.correct .fb-icon { display: inline-block; background-image: url('assets/images/ui-fb-correct.svg'); }
+/* a wrong answer has no icon: the header says it in words (not in the PSD or the storyboard) */
+.fb-body p { margin: 0 0 4px; font-size: var(--fb-size); font-weight: 600; line-height: 1.4; }
+.fb-body ol, .fb-body ul { margin: 2px 0 6px; padding: 0 34px 0 0; font-size: var(--fb-size); font-weight: 600; line-height: 1.35; }
+.fb-body .fb-table { border-collapse: collapse; margin: 10px 0 0; font-size: 26px; font-weight: 600; }
+.fb-body .fb-table th, .fb-body .fb-table td { border: 2px solid #fff; padding: 6px 18px; text-align: center; }
+.fb-body .figure-frame { position: relative; margin: 12px 0 0; }
+.fb-video-btn {
+  display: block; width: 560px; height: 410px; margin: 14px auto 0;
+  border: none; border-radius: 12px; cursor: pointer;
+  background: #555 center / cover no-repeat;
+  position: relative;
+}
+.fb-video-btn::before {
+  content: ''; position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%);
+  border-style: solid; border-width: 52px 0 52px 86px; border-color: transparent transparent transparent rgba(255,255,255,.85);
+}
+
+/* Question stepper (progress pills) — built by script.js from data-step.
+   PSD: glossy blue rounded squares, 51x52, right edge at 1775, top 37; the
+   current one bright, the others at half strength. */
+.q-stepper {
+  position: absolute; top: 37px; right: 145px;
+  display: none; gap: 2px; z-index: 20;
+  direction: rtl;
+}
+.q-stepper.visible { display: flex; }
+.q-step {
+  width: 51px; height: 52px; border-radius: 13px;
+  background: linear-gradient(160deg, #6E9FDC 0%, #2F6DB5 45%, #1D4E8F 100%);
+  box-shadow: inset 0 2px 3px rgba(255,255,255,.45), inset 0 -3px 4px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.4);
+  color: #C9D3E0; font-size: 34px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  opacity: .5;
+}
+.q-step.active { opacity: 1; color: #fff; background: linear-gradient(160deg, #A9CBF2 0%, #4A90E2 45%, #2D6BC0 100%); }
+
+/* Glossary term with a tooltip (hover/focus; tap on touch). The tip sits
+   after the paragraph and is shown by script.js; place it per screen. */
+.term {
+  border: none; background: none; padding: 0; margin: 0;
+  font: inherit; color: var(--term-color); text-decoration: underline dotted;
+  cursor: help;
+}
+.term-tip {
+  display: none; position: absolute; z-index: 30;
+  max-width: 520px; padding: 16px 22px;
+  background: #fff; border: 2px solid var(--term-color); border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  font-size: 26px; font-weight: 500; line-height: 1.4; color: var(--text);
+}
+.term-tip.show { display: block; }
+
+/* A fraction inside the text: <span class="frac"><span>2</span><span>5</span></span>
+   (numerator first). Stays text, so it is translated and read aloud; the
+   storyboard reader and qa_check write it as "2/5". Never a picture. */
+.frac {
+  display: inline-flex; flex-direction: column; vertical-align: middle;
+  text-align: center; line-height: 1; margin: 0 .15em; direction: ltr;
+  unicode-bidi: isolate;
+}
+.frac > span:first-child { border-bottom: .07em solid currentColor; padding: 0 .15em .08em; }
+.frac > span:last-child { padding-top: .08em; }
+/* An equation (one Office equation in the storyboard) reads left to right,
+   as in math, inside the Hebrew sentence: <span class="eq">… = …</span>.
+   Plain-text sums like "12 = 5 : 60" stay plain text, exactly as written. */
+.eq { direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+
+/* Placeholders while an asset is still missing:
+   <div class="applet-frame" data-pending-asset="applet: soil simulation (slide 26)"></div>
+   qa_check.py lists every one, and make_upload_zip.py refuses to package them. */
+.applet-frame[data-pending-asset], .figure-frame[data-pending-asset], div.screen-bg[data-pending-asset] {
+  background: repeating-linear-gradient(45deg, #dfe4e8 0 22px, #d3d9de 22px 44px);
+  display: flex; align-items: center; justify-content: center;
+}
+.applet-frame[data-pending-asset]::after, .figure-frame[data-pending-asset]::after, div.screen-bg[data-pending-asset]::after {
+  content: 'TO DO — ' attr(data-pending-asset);
+  font: 600 28px/1.3 var(--font-main), sans-serif; color: #44505a; direction: ltr;
+  padding: 16px 24px; background: rgba(255,255,255,.85); border-radius: 12px;
+}
+
+/* Image zoom */
+.figure-frame { position: absolute; margin: 0; background: #fff; border-radius: 20px; padding: 16px; }
+.figure-frame img { display: block; width: 100%; height: auto; }
+.zoom-btn {
+  position: absolute; top: 12px; left: 12px; width: 54px; height: 54px;
+  border: none; border-radius: 50%; background: var(--subject-500) url('assets/images/ui-zoom.svg') center / 60% no-repeat;
+  cursor: pointer;
+}
+#img-zoom-modal {
+  position: absolute; inset: 0; z-index: 300;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.7);
+}
+#img-zoom-modal.show { display: flex; }
+.img-zoom-panel { position: relative; max-width: 1600px; max-height: 960px; padding: 24px; background: #fff; border-radius: 24px; }
+#img-zoom-body img { display: block; max-width: 1550px; max-height: 900px; }
+.img-zoom-close {
+  position: absolute; top: -22px; right: -22px; width: 56px; height: 56px;
+  border: none; border-radius: 50%; background: var(--btn-bg); color: #fff; font-size: 28px; cursor: pointer;
+}
+
+/* Reopen popup: an earlier screen's applet / diagram shown again. */
+.reopen-btn {
+  position: absolute; top: 24px; right: 40px; z-index: 25;
+  height: 64px; padding: 0 28px;
+  border: none; border-radius: 32px;
+  background: #3A3A3A; color: #fff;
+  font-size: 26px; font-weight: 700; cursor: pointer;
+}
+.reopen-btn.is-open { background: var(--accent); }
+#reopen-popup {
+  position: absolute; top: 110px; right: 40px; z-index: 250;
+  width: 1100px; height: 700px; padding: 16px;
+  display: none;
+  background: #fff; border-radius: 24px; box-shadow: 0 6px 24px rgba(0,0,0,.45);
+}
+#reopen-popup.show { display: block; }
+#reopen-popup-body, #reopen-popup-body > * { position: static; width: 100%; height: 100%; }
+#reopen-popup-body img { object-fit: contain; }
+
+/* ---------- 4. Screen types ---------- */
+/* Video */
+.video-wrap { position: absolute; inset: 0; z-index: 1; }
+.video-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+.video-caption {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 90px; pointer-events: none;
+}
+.video-caption p {
+  margin: 0; max-width: 1400px; text-align: center;
+  unicode-bidi: plaintext; white-space: pre-line;
+  background: rgba(0,0,0,.75); color: #fff;
+  font-size: 34px; font-weight: 600; line-height: 1.4;
+  padding: 10px 24px; border-radius: 8px;
+}
+.play-btn-big {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 220px; height: 220px; border: none; border-radius: 50%;
+  background: rgba(60,60,60,.75); cursor: pointer; z-index: 5;
+}
+.play-btn-big::before {
+  content: ''; position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%);
+  border-style: solid; border-width: 52px 0 52px 86px; border-color: transparent transparent transparent #fff;
+}
+.vctrls {
+  position: absolute; left: 150px; right: 150px; bottom: 0; z-index: 14;
+  height: 58px; padding: 0 22px;
+  display: flex; align-items: center; gap: 12px;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(to top, rgba(0,0,0,.78), rgba(0,0,0,.32));
+}
+.vc-btn {
+  flex: 0 0 auto; width: 36px; height: 36px;
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,.12); color: #fff; font-size: 18px; line-height: 1;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.vc-btn:hover { background: rgba(255,255,255,.22); }
+.vc-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.vc-cc { width: auto; padding: 0 8px; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.vc-cc.is-off { color: rgba(255,255,255,.5); }
+.vc-time { flex: 0 0 auto; min-width: 40px; color: #fff; font-size: 15px; text-align: center; font-variant-numeric: tabular-nums; }
+.vc-seek { flex: 1 1 auto; accent-color: var(--accent); }
+.vc-vol { flex: 0 0 90px; accent-color: var(--accent); }
+
+/* Reveal tiles */
+.tiles { position: absolute; top: 220px; right: 120px; display: flex; flex-direction: column; gap: 24px; z-index: 4; }
+.tile {
+  position: relative; width: 150px; height: 150px; border-radius: 50%;
+  background: #fff; border: 6px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 800; color: var(--subject-500);
+  transition: filter .2s;
+}
+.tile.current { border-color: var(--fb-correct); }
+.tile.viewed:not(.current) { filter: grayscale(1) brightness(.85); }
+.tile-check {
+  display: none; position: absolute; bottom: -4px; left: -4px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--fb-correct); color: #fff; font-size: 28px;
+  align-items: center; justify-content: center;
+}
+.tile.viewed .tile-check { display: flex; }
+.tiles-board {
+  position: absolute; top: 260px; right: 420px; width: 1000px; min-height: 200px;
+  padding: 36px 44px; background: rgba(255,255,255,.95); border-radius: 30px;
+  font-size: 36px; font-weight: 600; line-height: 1.5;
+}
+.tiles-board.empty { visibility: hidden; }
+/* card-flip mode */
+.tiles[data-mode="card-flip"] .tile { width: 380px; height: 480px; border-radius: 24px; }
+.tile .tile-content { font-size: 28px; line-height: 1.4; padding: 24px; }
+.tiles[data-mode="card-flip"] .tile.flipped .tile-face { display: none; }
+.tiles[data-mode="card-flip"] .tile.flipped .tile-content { display: block !important; }
+
+/* Answer options — single (round mark) and multi (square mark).
+   PSD: 19px rings beside 33.3px text, one option per 38px line. */
+.q-answers { display: flex; flex-direction: column; gap: 4px; max-width: 1300px; }
+.q-opt {
+  display: flex; align-items: center; gap: 14px;
+  font-size: var(--text-size); font-weight: 600; line-height: 1.15;
+  cursor: pointer;
+}
+.q-mark {
+  flex: 0 0 auto; position: relative;
+  width: 21px; height: 21px;
+  border: 2.5px solid #1C2A4A; border-radius: 50%; background: #fff;
+}
+.q-opt[data-multi] .q-mark { border-radius: 6px; }
+.q-opt.selected .q-mark::after { content: ''; position: absolute; inset: 5px; border-radius: inherit; background: var(--subject-500); }
+.q-opt.correct { color: var(--opt-correct); }
+.q-opt.correct .q-mark { border-color: var(--opt-correct); }
+.q-opt.correct .q-mark::after { content: '✓'; inset: auto; top: -10px; right: -6px; background: none; color: var(--opt-correct); font-size: 32px; font-weight: 800; }
+.q-opt.wrong { color: var(--opt-wrong); }
+.q-opt.wrong .q-mark { border-color: var(--opt-wrong); }
+.q-opt.wrong .q-mark::after { content: '✕'; inset: auto; top: -8px; right: -2px; background: none; color: var(--opt-wrong); font-size: 26px; font-weight: 800; }
+
+/* Drag and drop */
+.dnd-bank { display: flex; flex-wrap: wrap; gap: 14px; min-height: 64px; margin: 10px 0 26px; }
+.dnd-chip {
+  min-height: 56px; padding: 6px 22px;
+  border: none; border-radius: 12px;
+  background: var(--chip-bg); color: var(--chip-text);
+  font-size: 28px; font-weight: 700;
+  cursor: grab; touch-action: none; user-select: none;
+}
+.dnd-chip.picked { outline: 4px solid var(--accent); outline-offset: 3px; }
+.dnd-chip.dragging { opacity: .35; }
+.dnd-chip.locked { cursor: default; }
+.dnd-ghost { position: absolute; z-index: 400; pointer-events: none; opacity: .92; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.dnd-slot {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 190px; min-height: 60px; margin: 4px 6px; vertical-align: middle;
+  border: 3px dashed #8a8a8a; border-radius: 12px; background: #fff;
+}
+.dnd-slot.filled { border-style: solid; border-color: transparent; }
+.dnd-slot.drop-target { border-color: var(--accent); background: #eaf6fc; }
+.dnd-slot.correct { border: 3px solid var(--opt-correct); }
+.dnd-slot.wrong { border: 3px solid var(--opt-wrong); }
+.cloze { font-size: var(--text-size); font-weight: 600; line-height: 2.1; }
+
+/* Applets */
+.applet-frame {
+  position: absolute; top: 160px; left: 220px; width: 1480px; height: 820px;
+  border-radius: 24px; overflow: hidden; background: #fff;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+}
+.applet-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-btn.blink { animation: none; }
+  * { transition: none !important; }
+}
+
+/* Patterns used by later screens (see references/screen-patterns.md) */
+/* Guided hub: branch buttons; the next branch moves on (data-action="next"). */
+.hub-btn {
+  position: absolute; min-width: 320px; height: 76px; padding: 0 30px;
+  border: none; border-radius: 18px; background: #3A7D22; color: #fff;
+  font-size: 30px; font-weight: 700; cursor: pointer;
+}
+.hub-btn:disabled { background: #9aa39a; cursor: default; }
+.hub-btn.done { background: #3a3a3a; }
+.hub-btn.done::after { content: ' ✓'; }
+/* Ordering table for drag-to-order questions. */
+.order-table { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.order-table li { display: flex; align-items: center; gap: 16px; font-size: 30px; font-weight: 600; }
+.order-table .row-num { flex: 0 0 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; }
+.order-table .dnd-slot { flex: 1 1 auto; min-height: 64px; justify-content: flex-start; padding: 0 8px; }
+/* Gradual reveal ("יעלו בהדרגתיות"): add class="reveal" and stagger delays per screen. */
+.screen.active .reveal { animation: revealIn .5s both; }
+@keyframes revealIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .screen.active .reveal { animation: none; } }
+
+
+/* ---- Parts this lomda added to the starter's patterns ---- */
+
+/* Popups over their own screen (script.js wraps the content in .popup-panel and
+   adds the X). PSD: cream paper with a thick dark border; X top left. */
+.popup-src {
+  position: absolute; inset: 0; z-index: 60;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(20, 20, 20, .6);
+}
+.popup-src.show { display: flex; }
+.popup-src:focus { outline: none; }
+.popup-panel {
+  position: relative;
+  min-width: 520px; max-width: 1500px; max-height: 960px; overflow: auto;
+  padding: 50px 70px 44px;
+  background: var(--popup-bg);
+  border: 7px solid #1F1F1F; border-radius: 46px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.55);
+  font-size: var(--text-size); font-weight: 600; line-height: 1.3; text-align: center;
+}
+.popup-panel p { margin: 0 0 6px; }
+.popup-panel .figure-frame { position: relative; margin: 18px auto 0; background: none; padding: 0; }
+.popup-close {
+  position: absolute; top: 24px; left: 28px;
+  width: 44px; height: 44px; padding: 0;
+  border: none; background: none; cursor: pointer;
+  font-size: 0;
+}
+.popup-close::before, .popup-close::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 40px; height: 6px; border-radius: 3px; background: #1F1F1F;
+}
+.popup-close::before { transform: translate(-50%, -50%) rotate(45deg); }
+.popup-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.popup-wide .popup-panel { width: 1500px; }
+
+/* Tables on the paper card (Q2, Q3א, Q3ב): live HTML over shared-paper-card.png.
+   PSD (frame p4): card 917x516 at 755,387; table 832x385 at 803,463;
+   columns (right to left) 180 / 212 / 215 / 225; header 74, rows 103. */
+.paper-card {
+  position: absolute; left: 755px; top: 387px; width: 917px; height: 516px;
+  background: var(--paper); border-radius: 10px;
+  box-shadow: inset 0 0 0 10px #E8DFC6, inset 0 0 0 13px var(--paper-line), 0 4px 10px rgba(0,0,0,.25);
+}
+.q-table {
+  position: absolute; left: 803px; top: 463px; width: 832px;
+  font-size: 25.4px; font-weight: 600; color: #000;
+  border: 2.5px solid var(--paper-line);
+}
+.q-tr {
+  position: relative;
+  display: grid; grid-template-columns: 180px 212px 215px 1fr;
+  min-height: 103px;
+  border-top: 2px solid var(--paper-line);
+}
+.q-tr > span { display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px 10px; }
+.q-tr > span + span { border-right: 2px solid var(--paper-line); }
+.q-tr.q-th { min-height: 74px; border-top: none; background: var(--table-head); font-weight: 700; }
+.q-tr .frac { font-size: 30px; }
+/* table rows as options (Q3א, Q3ב) */
+.q-tr.q-opt { cursor: pointer; font-size: 25.4px; }
+.q-tr.q-opt:hover { background: rgba(47,109,181,.08); }
+.q-tr.q-opt.selected { background: rgba(47,109,181,.2); }
+.q-tr.q-opt.correct { color: inherit; background: rgba(62,163,74,.22); }
+.q-tr.q-opt.wrong { color: inherit; background: rgba(202,67,61,.2); }
+.q-tr.q-opt.correct::after {
+  content: '✓'; position: absolute; left: -52px; top: 50%; transform: translateY(-50%);
+  color: var(--fb-correct); font-size: 46px; font-weight: 800;
+}
+
+/* Typed answers. A fraction is two boxes with a bar between (PSD: 75x40). */
+.q-input { display: inline-flex; align-items: center; justify-content: center; }
+.frac-input { flex-direction: column; gap: 14px; position: relative; }
+.frac-input::after {
+  content: ''; position: absolute; left: -6px; right: -6px; top: 50%;
+  height: 3px; margin-top: -1.5px; background: #1C2A4A;
+}
+.q-in {
+  width: 75px; height: 40px; padding: 0;
+  border: 2.5px solid #1C2A4A; border-radius: 6px; background: #fff;
+  font: 700 28px/1 var(--font-main), sans-serif; color: #000; text-align: center;
+  direction: ltr;
+}
+.q-in:focus { outline: var(--focus); outline-offset: 1px; }
+.q-in:disabled { opacity: 1; }
+.q-input.correct .q-in, .q-input.revealed .q-in { border-color: var(--fb-correct); color: var(--fb-correct); background: #EEF8EF; }
+.q-input.correct::after, .q-input.revealed::after { background: var(--fb-correct); }
+.q-input.wrong .q-in { border-color: var(--opt-wrong); color: #8E1F1A; background: #FBEDEC; }
+
+/* A table row checked on its own (Q2): its help and check buttons sit to
+   the left of the table, on the row's line (PSD x 622 and 452). */
+.q-part .help-btn { left: -170px; top: 50%; margin-top: -54px; width: 108px; height: 108px; font-size: 30px; }
+.q-part .btn-check { left: -351px; top: 50%; margin-top: -40px; min-width: 133px; height: 82px; padding: 0 12px; font-size: 30.2px; border-radius: 12px; }
+
+/* The conditions card (Q4, Q5). The card picture's title is painted in, so the
+   live title is for screen readers until a clean card arrives (open question 19). */
+.conditions-card {
+  position: absolute; left: 459px; top: 202px; width: 482px; height: 643px;
+  padding: 175px 60px 0;
+  background: var(--paper); border: 3px solid var(--cond-text); border-radius: 6px;
+  color: var(--cond-text); font-size: 29.3px; font-weight: 700; line-height: 1.12; text-align: center;
+}
+.conditions-card h3 { margin: 0; font-size: 40px; position: absolute; top: 70px; left: 0; right: 0; }
+.conditions-card ul { list-style: none; margin: 0; padding: 0; }
+.conditions-card li { margin: 0 0 58px; }
+.conditions-card li + li { border-top: 3px dashed var(--cond-text); padding-top: 40px; }
+
+/* Free text (Q5 "הסבירו מדוע"). PSD: 592x257 box. */
+.q-free-label { display: block; margin: 22px 0 8px; font-size: var(--text-size); font-weight: 600; }
+.q-free {
+  display: block; width: 592px; height: 257px; padding: 14px 18px;
+  border: 2.5px solid #1C2A4A; border-radius: 22px; background: #F5ECDC;
+  font: 600 28px/1.35 var(--font-main), sans-serif; resize: none;
+}
+
+/* The analysis dashboard of slides 28-31 (PSD frame p12): a full-size
+   composition at the PSD's own coordinates. The screen picture and the pie are
+   pictures; the title, area names and fractions are live text. The corrected
+   diagram shows it as it is; the Q7 card shows it scaled down (.dash-card). */
+.dash { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
+.dash-screen { position: absolute; left: 49px; top: 0; width: 1631px; height: 918px; }
+.dash-title { position: absolute; left: 424px; top: 76px; width: 330px; margin: 0; text-align: center;
+  color: #FCFAFA; font-size: 28.3px; font-weight: 700; }
+.dash-pie { position: absolute; left: 379px; top: 164px; width: 435px; height: 435px; }
+.diagram-legend { position: absolute; left: 1040px; top: 182px; width: 470px; list-style: none; margin: 0; padding: 0; }
+.diagram-legend li { position: relative; height: 105px; color: #FCFAFA; font-size: 28.3px; font-weight: 700; }
+.diagram-legend .lg-name { position: absolute; right: 70px; left: 20px; top: 26px; text-align: center; }
+.diagram-legend .frac { position: absolute; left: 408px; top: 6px; font-size: 26px; }
+.dash-card {
+  position: absolute; left: 181px; top: 271px; width: 833px; height: 377px; margin: 0;
+  overflow: hidden; border-radius: 24px; background: #0F2A30;
+}
+.dash-card .dash { transform: scale(.645); transform-origin: top left; left: -160px; top: -22px; }
+
+/* Banners (welcome, the corrected diagram) and the sign on the finish screen */
+.banner {
+  position: absolute; z-index: 6;
+  padding: 18px 50px; background: #fff; color: #232020;
+  border-radius: 0 0 40px 40px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  font-size: var(--text-size); font-weight: 600; line-height: 1.25;
+}
+.banner p { margin: 0; }
+/* ---------- 5. Per-screen positions ----------
+   One block per screen, by data-sid, in screen order. Example:
+   [data-sid="q1"] .q-card { top: 140px; right: 80px; width: 1100px; }
+   #feedback-popup.fb-q1 { left: 340px; bottom: 185px; }          */
+
+/* ---- 1 · video-intro ---- */
+.play-btn-big { width: 400px; height: 400px; background: rgba(255,255,255,.22); border: 5px solid rgba(255,255,255,.55); }
+.play-btn-big::before { border-width: 70px 0 70px 116px; border-color: transparent transparent transparent rgba(255,255,255,.9); }
+
+/* ---- 2 · welcome (PSD p2) ---- */
+[data-sid="welcome"] .welcome-banner { left: 503px; right: 0; top: 0; padding: 22px 72px 26px 60px; border-radius: 0 0 0 60px; }
+[data-sid="welcome"] .welcome-banner .reveal:nth-child(2) { animation-delay: .6s; }
+[data-sid="welcome"] .welcome-banner .reveal:nth-child(3) { animation-delay: 1.2s; }
+[data-sid="welcome"] .welcome-banner .reveal:nth-child(4) { animation-delay: 1.8s; }
+[data-sid="welcome"] .reserve-map { left: 360px; top: 287px; width: 1201px; height: 623px; padding: 0; }
+
+/* ---- 3 · q1 (PSD p3, p3a) ---- */
+[data-sid="q1"] .q-card { top: 196px; width: 580px; }      /* lifted 44px with the picture: room for the larger feedback */
+[data-sid="q1"] .figure-frame { left: 198px; top: 188px; width: 866px; height: 479px; padding: 0; }
+[data-sid="q1"] .map-label { position: absolute; margin: 0; font-size: 24px; font-weight: 600; line-height: 24px; white-space: nowrap; z-index: 2; }
+/* PSD: "5 ק״מ" ends at x 281, 11px left of its arrow (x 292); "?" is centred under the horizontal arrow (x 635) */
+[data-sid="q1"] .map-side { right: 1639px; top: 379px; text-align: right; }
+[data-sid="q1"] .map-bottom { left: 635px; top: 563px; transform: translateX(-50%); }
+/* the two dimension arrows: PSD pixels, black like the labels */
+.map-arrows { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 2; pointer-events: none; transform: translateY(-44px); }
+.map-arrows line { stroke: #1D1B1A; stroke-width: 5; }
+.map-arrows polygon { fill: #1D1B1A; }
+
+/* ---- 4 · q2 (PSD p4, p4a, p4a2, p4b) ---- */
+[data-sid="q2"] .q-card { width: 1060px; }
+#feedback-popup.fb-q2 { left: 180px; bottom: 181px; width: 459px; }
+.help-btn.is-open, .applet-btn.is-open { z-index: 70; }
+#help-q2-1 .popup-panel { position: absolute; left: 690px; top: 70px; width: 820px; }
+#help-q2-1 .figure-frame { width: 571px; height: 330px; }
+#help-q2-2 .popup-panel { position: absolute; left: 560px; top: 70px; width: 1290px; text-align: right; padding-left: 700px; min-height: 760px; }
+#help-q2-2 .figure-frame { position: absolute; left: 70px; width: 571px; height: 330px; margin: 0; }
+#help-q2-2 .figure-frame:nth-of-type(1) { top: 60px; }
+#help-q2-2 .figure-frame:nth-of-type(2) { top: 412px; }
+
+/* ---- 5 · q3a (no frame; as q3b) ---- */
+[data-sid="q3a"] .q-card { width: 1380px; }
+
+/* ---- 6 · q3b (PSD p5+, p5) ---- */
+[data-sid="q3b"] .q-card { width: 1380px; }
+[data-sid="q3b"] .character { left: 461px; top: 426px; width: 334px; height: 497px; padding: 0; background: none; }
+#help-q3b .popup-panel { position: absolute; left: 90px; top: 30px; width: 1350px; height: 930px;
+  padding: 90px 70px 40px 760px; text-align: right; font-size: 26.7px; }
+#help-q3b .help-options { position: absolute; left: 130px; top: 50px; display: flex; flex-direction: column; gap: 20px; }
+#help-q3b .help-option { display: flex; flex-direction: row-reverse; align-items: center; gap: 40px; }
+#help-q3b .help-option .figure-frame { width: 392px; height: 225px; margin: 0; }
+#help-q3b .help-option p { width: 150px; margin: 0; text-align: center; }
+
+/* ---- 8 · q4 (PSD p7) ---- */
+[data-sid="q4"] .q-card { width: 660px; }
+[data-sid="q4"] .q-fields { position: absolute; right: 244px; top: 348px; display: flex; flex-direction: column; gap: 30px; }
+[data-sid="q4"] .q-field { display: flex; align-items: center; gap: 36px; }
+[data-sid="q4"] .q-field-label { min-width: 100px; font-size: var(--text-size); font-weight: 700; }
+[data-sid="q4"] .q-in { width: 125px; height: 60px; font-size: 34px; }
+[data-sid="q4"] .frac-input { gap: 26px; }
+#applet-q4 .popup-panel, #applet-q5 .popup-panel { position: absolute; left: 210px; top: 178px; width: 1500px; padding: 66px 40px 26px; }
+#applet-q4 .applet-frame, #applet-q5 .applet-frame { position: relative; top: auto; left: auto; width: 1420px; height: 760px; box-shadow: none; border-radius: 12px; }
+
+/* ---- 9 · q5 (PSD p8, p8a) ---- */
+[data-sid="q5"] .q-card { width: 592px; }
+[data-sid="q5"] .q-answers { margin-top: 26px; }
+#feedback-popup.fb-q5 { left: 229px; bottom: 222px; width: 765px; }
+
+/* ---- 10 · q6 (PSD p10, p10a) ---- */
+[data-sid="q6"] .q-card { width: 822px; }
+/* The table sits on the paper card of the design (PSD: card 822x350 at 877,250, table 707 wide at 935,320,
+   header 77 / row 127), with the notepad and pen top right and the binoculars bottom left. The card
+   is the designer's clean card, sliced so its corners keep their shape. */
+[data-sid="q6"] .plan-card {
+  position: relative; right: -23px; width: 822px; height: 350px; margin: 22px 0 8px;
+  padding: 85px 57px 0 58px;
+  border: 0; box-sizing: border-box;
+}
+[data-sid="q6"] .plan-card::before {
+  content: ''; position: absolute; inset: 15px 0 -15px 0;
+  border: 60px solid transparent; border-image: url('assets/images/shared-paper-card.png') 100 fill / 60px stretch;
+}
+[data-sid="q6"] .plan-table {
+  position: relative; width: 707px; table-layout: fixed; border-collapse: collapse;
+  background: var(--paper); border: 2.5px solid var(--paper-line);
+  font-size: 25.4px; font-weight: 600; text-align: center;
+}
+[data-sid="q6"] .plan-table th:nth-child(1), [data-sid="q6"] .plan-table td:nth-child(1) { width: 164px; }
+[data-sid="q6"] .plan-table th:nth-child(2), [data-sid="q6"] .plan-table td:nth-child(2) { width: 183px; }
+[data-sid="q6"] .plan-table th:nth-child(3), [data-sid="q6"] .plan-table td:nth-child(3) { width: 173px; }
+[data-sid="q6"] .plan-table tr:first-child { height: 77px; }
+[data-sid="q6"] .plan-table tr:last-child { height: 127px; }
+[data-sid="q6"] .plan-art { position: absolute; pointer-events: none; }
+[data-sid="q6"] .plan-notepad { left: 708px; top: 12px; width: 98px; }      /* PSD 1580,266 → card 877,250 */
+[data-sid="q6"] .plan-binoculars { left: 14px; top: 258px; width: 120px; }   /* PSD 903,495 */
+[data-sid="q6"] .plan-table th, [data-sid="q6"] .plan-table td { border: 2px solid var(--paper-line); padding: 6px 8px; }
+[data-sid="q6"] .plan-table tr:first-child th { background: var(--table-head); }
+[data-sid="q6"] .plan-table .frac { font-size: 30px; }
+[data-sid="q6"] .characters { left: 434px; top: 503px; width: 432px; height: 550px; padding: 0; background: none; }
+#feedback-popup.fb-q6 { left: 221px; bottom: 207px; width: 629px; }
+#feedback-popup.fb-q6 .fb-body .figure-frame { width: 483px; height: 281px; }
+
+/* ---- 12 · q7 (PSD p13) ---- */
+[data-sid="q7"] .q-card { top: 181px; width: 620px; }      /* lifted 60px with the diagram card */
+[data-sid="q7"] .dash-card { top: 211px; }
+
+/* ---- 13 · diagram-fixed (PSD p14) ---- */
+[data-sid="diagram-fixed"] .diagram-banner { left: 379px; right: 0; top: 0; padding: 22px 60px; border-radius: 0 0 0 50px; font-size: 32px; }
+[data-sid="diagram-fixed"] .dash .dash-pie { left: 375px; top: 162px; width: 438px; height: 436px; }
+[data-sid="diagram-fixed"] .kid { padding: 0; background: none; }
+[data-sid="diagram-fixed"] .kid-roy { left: 0; top: 330px; width: 560px; height: 750px; }
+[data-sid="diagram-fixed"] .kid-may { left: 1450px; top: 330px; width: 470px; height: 750px; }
+
+/* ---- 14 · q8 (PSD p15) ---- */
+[data-sid="q8"] .q-card { width: 770px; }
+[data-sid="q8"] .q-in { width: 261px; height: 115px; margin-top: 14px; border-radius: 22px; font-size: 52px; background: #F5ECDC; }
+[data-sid="q8"] .photo { left: 294px; top: 207px; width: 657px; height: 601px; padding: 0; background: none; }
+
+/* ---- 15 · finish (PSD p16; the closing box and "סיימתי" from slide 34) ---- */
+[data-sid="finish"] .finish-sign { position: absolute; left: 600px; top: 170px; width: 610px; margin: 0; text-align: center; line-height: 1;
+  font-size: 77.6px; font-weight: 700; color: #000; }
+[data-sid="finish"] .finish-text {
+  position: absolute; left: 357px; right: 357px; bottom: 30px; padding: 24px 50px;
+  background: #FFF8E6; border-radius: 30px; box-shadow: 0 4px 14px rgba(0,0,0,.4);
+  font-size: 32px; font-weight: 700; line-height: 1.35; text-align: center;
+}
+[data-sid="finish"] .finish-text p { margin: 0 0 6px; }
+[data-sid="finish"] .finish-btn {
+  left: 43px; top: 950px; min-width: 240px; height: 96px;
+  border: 4px solid #fff; border-radius: 14px; box-shadow: 0 0 0 6px var(--btn-bg), 0 6px 14px rgba(0,0,0,.45);
+}
+#finish-popup .popup-panel { width: 760px; padding: 70px 70px 60px; font-size: 36px; }
+[data-final-grade] { font-weight: 800; }
+
+/* ---- Exported skins (batch 1–3, 2026-10-13) ---- */
+.nav-btn { width: 144px; height: 144px; top: 915px; border: none; border-radius: 0; box-shadow: none; background: center / contain no-repeat; }
+.nav-btn::before { display: none; }
+.nav-next { left: 4px; background-image: url('assets/images/ui-btn-next.png'); }
+.nav-prev { right: 16px; background-image: url('assets/images/ui-btn-back.png'); }
+.btn-check { left: 227px; top: 738px; width: 235px; height: 154px; min-width: 0; padding: 0 0 26px;
+  border: none; border-radius: 0; box-shadow: none; background: url('assets/images/ui-btn-check.png') center / 100% 100% no-repeat; }
+.help-btn, .applet-btn { left: 33px; top: 9px; width: 162px; height: 163px; border: none; box-shadow: none; padding: 0 0 26px;
+  background: url('assets/images/ui-btn-round.png') center / 100% 100% no-repeat; }
+.applet-btn { left: 157px; }
+.q-part .help-btn { left: -181px; margin-top: -68px; width: 137px; height: 137px; font-size: 30px; padding-bottom: 22px; }
+.q-part .btn-check { left: -351px; margin-top: -61px; width: 173px; height: 122px; min-width: 0; font-size: 30.2px; padding-bottom: 20px; }
+/* The popup frame is drawn in CSS (a sliced picture left hairline seams and little
+   "ears" on the edges once the stage is scaled). The X lives in its own strip at the
+   top of the panel, so it never touches the text. */
+.popup-panel { border: 12px solid #1F1F1F; border-radius: 50px 54px 48px 52px / 52px 48px 54px 50px;
+  background: var(--popup-bg); box-shadow: 0 8px 24px rgba(0,0,0,.45); padding: 58px 56px 38px; }
+.popup-close { top: 14px; left: auto; right: 20px; width: 36px; height: 34px; background: url('assets/images/ui-close.png') center / contain no-repeat; }
+.popup-close::before, .popup-close::after { display: none; }
+.q-opt.correct .q-mark::after { content: ''; inset: auto; top: -8px; right: -4px; width: 28px; height: 26px;
+  background: url('assets/images/ui-check-mark.png') center / contain no-repeat; }
+.q-tr.q-opt.correct::after { content: ''; width: 42px; height: 39px; left: -56px;
+  background: url('assets/images/ui-check-mark.png') center / contain no-repeat; }
+.play-btn-big { width: 480px; height: 490px; border: none; border-radius: 0; background: url('assets/images/ui-play.png') center / contain no-repeat; }
+.play-btn-big::before { display: none; }
+.paper-card { box-shadow: none; background: none; border-radius: 0; }
+.figure-frame { background: none; padding: 0; border-radius: 0; }
+.conditions-card { background: none; border: none; border-radius: 0; }
+.conditions-card .cond-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the design hides the card's old painted text under two paper boxes (Rectangle 1721) and writes the corrected text on them */
+.conditions-card ul { position: relative; }
+.conditions-card li { background: #F4E9D7; margin: 0 0 45px; padding: 8px 10px; }
+.conditions-card li + li { border-top: none; padding-top: 8px; }
+.fb-video-btn { background-image: url('assets/images/q5-video-poster.jpg'); }
+.fb-video-btn::before { border: none; width: 240px; height: 245px; background: url('assets/images/ui-play.png') center / contain no-repeat; left: 50%; }
+[data-sid="q4"] .q-in { background: #F5ECDC; }
+.km-figure { position: relative; width: 483px; margin: 14px auto 0; }
+.km-figure .figure-frame { position: relative; width: 483px; height: 281px; margin: 0; }
+.km-figure .km { position: absolute; top: 128px; width: 70px; padding: 0 12px; text-align: center; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.1; }
+.km-figure .k1 { left: 18px; } .km-figure .k2 { left: 114px; } .km-figure .k3 { left: 207px; }
+[data-sid="q6"] .characters { left: 434px; top: 503px; width: 432px; height: auto; }
+[data-sid="diagram-fixed"] .kid { position: absolute; }
+[data-sid="diagram-fixed"] .kid-roy { left: 28px; top: 331px; width: auto; height: auto; }
+[data-sid="diagram-fixed"] .kid-may { left: 455px; top: 334px; width: auto; height: auto; }
+
+/* ---- Feedback placement (self-QA, 2026-10-13) ----
+   The design puts the feedback box over the check button, which is right for
+   the final feedback (the button is gone by then) but not for the retry
+   message: the learner changes the answer and must reach "צדקתי?" again.
+   The retry message sits beside it instead, clear of the question. */
+#feedback-popup.retry, #feedback-popup.retryPartial { left: 480px; width: 560px; bottom: 181px; }
+#feedback-popup.fb-q3a.retry, #feedback-popup.fb-q3b.retry { left: 196px; bottom: 354px; }
+#feedback-popup.fb-q4.retry, #feedback-popup.fb-q5.retry { left: 20px; width: 420px; bottom: 354px; }
+/* Q2: a row's feedback must leave the other rows' help and check buttons free (x 452–760) */
+#feedback-popup.fb-q2 { left: 20px; width: 415px; }
+/* final feedback clear of what it explains: the table (Q3), the map (Q1), the diagram (Q7) */
+#feedback-popup { padding: 18px 30px; }
+.fb-body p { line-height: 1.3; margin-bottom: 2px; }
+#feedback-popup.fb-q1, #feedback-popup.fb-q7 { bottom: 150px; }
+#feedback-popup.fb-q3a, #feedback-popup.fb-q3b { left: 30px; width: 740px; }
+
+/* ---- Help popup next to its button (feedback round, 2026-10-21) ----
+   A help text opened from the round button at the top left appears right beside
+   it, as in the earlier lomdot, not in the middle of the screen. The dark backdrop
+   stays; the lit button stays above it. Other positions of the button come later. */
+.popup-by-btn > .popup-panel { position: absolute; left: 212px; top: 22px; max-width: 880px; }
+#help-q4 > .popup-panel { left: 372px; }              /* the "יישומון" button sits next to עזרה on q4 */
+#help-q3b .popup-panel { left: 212px; top: 22px; }    /* the large help of q3b, same anchor */
+
+/* ---- Retry message ("נסו שוב") ----
+   Always inside the white panel (its dark edge is at x 160 / y 905) and clear of the
+   check button (x 227–462, y 738+), the tables, the pictures and the answers. */
+#feedback-popup.retry, #feedback-popup.retryPartial { bottom: 250px; }
+#feedback-popup.fb-q1.retry, #feedback-popup.fb-q7.retry { left: 480px; width: 560px; bottom: 250px; }
+#feedback-popup.fb-q6.retry { left: 880px; width: 560px; bottom: 250px; }          /* right of the two kids */
+#feedback-popup.fb-q3a.retry, #feedback-popup.fb-q3b.retry { left: 196px; width: 540px; bottom: 354px; }   /* ends before the table (x 755) */
+#feedback-popup.fb-q4.retry, #feedback-popup.fb-q5.retry { left: 182px; width: 262px; bottom: 354px; }     /* left of the conditions card (x 459) */
+#feedback-popup.fb-q2.retry { left: 180px; width: 272px; padding-left: 14px; padding-right: 14px; bottom: 250px; }          /* left of the row buttons (x 463), inside the panel */
+#feedback-popup.fb-q8.retry { left: 960px; width: 560px; bottom: 250px; }          /* right of the photo, below the answer box */
+#feedback-popup.fb-q2.retry .fb-title, #feedback-popup.fb-q2.retry .fb-body p { text-wrap: balance; }
+
+/* ---- Feedback typography (2026-10-21): headers clearly larger than the text ---- */
+
+/* ---- Final feedback boxes (2026-10-21) ----
+   Larger text needs more room. Every box now ends at y 885, inside the white panel
+   (its dark lower edge starts at y 905), and sits where it covers the least of what it
+   explains. The retry message has its own spots above. */
+#feedback-popup.fb-q1 { left: 196px; width: 900px; bottom: 195px; }
+#feedback-popup.fb-q3a, #feedback-popup.fb-q3b { left: 182px; width: 570px; bottom: 195px; }   /* left of the table (x 755) */
+#feedback-popup.fb-q4 { left: 196px; width: 1180px; bottom: 195px; }                           /* the answers (x 1415+) stay visible */
+#feedback-popup.fb-q5 { left: 229px; width: 765px; bottom: 195px; }
+#feedback-popup.fb-q6 { left: 221px; width: 629px; bottom: 195px; }
+#feedback-popup.fb-q7 { left: 196px; width: 1000px; bottom: 195px; }
+#feedback-popup.fb-q8 { left: 980px; width: 720px; bottom: 195px; }                            /* right of the photo, below the answer box */
+
+/* fine-tuning after the first look (2026-10-21) */
+#feedback-popup.fb-q4 { left: 190px; width: 1200px; padding-top: 14px; padding-bottom: 14px; }   /* top stays below the 3rd line of the question (y 262) */
+#feedback-popup.fb-q7 { width: 1480px; }                                                       /* wide, so it stays below the diagram card (ends y 588) */
+#feedback-popup.fb-q8 { left: 940px; width: 775px; }
+/* q2: the box has to stay left of the rows' buttons, so it keeps the design's body size; the header is still clearly larger */
+#feedback-popup.fb-q2 .fb-body p .frac { font-size: .9em; margin-top: -.05em; margin-bottom: -.05em; }
+/* rows 2 and 3 have no picture, so their text takes the size of the other screens */
+#feedback-popup.fb-q2-p2:not(.retry) .fb-body p .frac, #feedback-popup.fb-q2-p3:not(.retry) .fb-body p .frac { font-size: 1em; margin-top: 0; margin-bottom: 0; }
+#feedback-popup.fb-q2 { left: 181px; width: 440px; bottom: 195px; padding: 12px 26px; }   /* the design's spot (x 181–637): inside the panel, the help buttons (x 634+) stay visible */
+.fb-title { text-wrap: balance; }
+
+/* ---- q2 table, row buttons and help popups (2026-10-21) ---- */
+/* Q2: the card and its rows are taller (the question text ends at y 340), so the three rows'
+   buttons no longer touch. Card 917x541 at 352; table at 428 with 112px rows. */
+[data-sid="q2"] .paper-card { top: 352px; height: 541px; }
+[data-sid="q2"] .q-table { top: 428px; }
+[data-sid="q2"] .q-tr { min-height: 112px; }
+[data-sid="q2"] .q-tr.q-th { min-height: 74px; }
+/* Row buttons at the design's size: the help disc is 97px (group 137 with its shadow), the check board 133x82 */
+.q-part .help-btn { left: -177px; width: 129px; height: 129px; margin-top: -64.5px; padding-bottom: 21px; }
+.q-part .btn-check { left: -349px; width: 168px; height: 110px; margin-top: -55px; padding-bottom: 18px; }
+/* Help popups of the rows: the popup's left edge runs through the pressed button (only its edge
+   overlaps the frame, as in the design); the content starts well to the right of the button. */
+#help-q2-1 .popup-panel, #help-q2-2 .popup-panel, #help-q2-3 .popup-panel { position: absolute; left: 676px; }
+#help-q2-1 .popup-panel { top: 70px; width: 880px; padding-left: 120px; }
+#help-q2-2 .popup-panel { top: 70px; width: 1230px; height: 830px; min-height: 0; overflow: visible; padding: 58px 56px 40px 692px; text-align: right; }
+#help-q2-2 .figure-frame { left: 112px; width: 540px; height: 312px; }
+#help-q2-2 .figure-frame:nth-of-type(1) { top: 50px; }
+#help-q2-2 .figure-frame:nth-of-type(2) { top: 396px; }
+#help-q2-3 .popup-panel { top: 718px; padding-left: 120px; }
+
+
+/* ---- Card art (2026-10-21): clean card + separate drone/clips and compass, drawn above the table ----
+   The drone group sits in the card's top right corner, high enough to clear the header text;
+   the compass in the bottom left corner. Positions follow the card (q2's card is taller). */
+.paper-art { position: absolute; z-index: 4; pointer-events: none; }
+.paper-drone { left: 1547px; top: 401px; width: 108px; }
+.paper-compass { left: 769px; top: 810px; width: 88px; }
+[data-sid="q2"] .paper-drone { top: 366px; }
+[data-sid="q2"] .paper-compass { top: 800px; }
+
+/* ---- Option tables (q3a, q3b) ---- */
+/* the generic .q-opt (flex, 14px gap, centred) leaked into the table rows: the columns drifted
+   away from the header's and the dividers were short. Rows use the header's grid exactly. */
+.q-tr.q-opt { gap: 0; align-items: stretch; }
+.q-tr .eq-ok { color: inherit; }                                 /* "= 1/2" is black like the rest of the row (SME 2026-11-10; it was green) */
+/* the green check sits at the right end of the correct row, clear of the feedback box;
+   the row label moves left to make room */
+.q-tr.q-opt > span:first-child { padding-right: 10px; }   /* "אפשרות N" centred in its cell (SME round 2026-10-25) */
+.q-tr.q-opt.correct::after { left: auto; right: 6px; width: 30px; height: 28px; }   /* clear of the centred label */
+
+/* q3a has only a two-line question: the table block moves up 82px so it sits in the middle of
+   the free space under the text (card 305–821) instead of right above the frame's lower edge.
+   The final feedback follows the card's bottom edge. */
+[data-sid="q3a"] .paper-card { top: 305px; }
+[data-sid="q3a"] .q-table { top: 381px; }
+[data-sid="q3a"] .paper-drone { top: 319px; }
+[data-sid="q3a"] .paper-compass { top: 728px; }
+#feedback-popup.fb-q3a { bottom: 259px; }
+
+/* q3b: May stands in front of the card and the table (the design), below the feedback */
+[data-sid="q3b"] .character { z-index: 6; position: absolute; }
+
+/* ---- q4 (2026-10-21) ---- */
+.applet-btn { left: 190px; }                          /* clear of עזרה (its shadow used to touch) */
+#applet-q4 .popup-panel, #applet-q5 .popup-panel { overflow: visible; top: 160px; }   /* the whole applet shows at once */
+#applet-q4 .applet-frame iframe, #applet-q5 .applet-frame iframe { overflow: hidden; }
+
+/* ---- q5: "אל תשכחו להסביר מדוע" (2026-10-21) ----
+   After yes/no is picked and the explanation is still under 3 characters, a glowing hand points
+   at the box; the check button appears once 3 characters are written. */
+.q-free:disabled { opacity: 1; color: #000; }
+.q-free.needs-text { border-color: var(--accent); animation: freeGlow 1.4s ease-in-out infinite; }
+@keyframes freeGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(47,109,181,.0); } 50% { box-shadow: 0 0 0 8px rgba(47,109,181,.28), 0 0 22px 6px rgba(255,196,60,.55); } }
+.q-free-hint { display: flex; align-items: center; gap: 14px; margin-top: 10px; width: 592px; }
+.q-free-hint[hidden] { display: none; }
+.hint-hand { flex: 0 0 auto; width: 56px; height: 66px; fill: #F7CDA3; stroke: #8A5A2B; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255,196,60,.95)); animation: handNudge 1.1s ease-in-out infinite; }
+.hint-hand .hint-crease { fill: none; stroke-width: 2.2; }
+@keyframes handNudge { 0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 6px rgba(255,196,60,.7)); } 50% { transform: translateY(-9px); filter: drop-shadow(0 0 16px rgba(255,196,60,1)); } }
+.hint-text { font-size: 34px; font-weight: 800; color: var(--subject-600); }
+@media (prefers-reduced-motion: reduce) { .q-free.needs-text, .hint-hand { animation: none; } }
+
+/* ---- Characters step aside while a feedback box is open (2026-10-21) ---- */
+#app.fb-open .screen.active .character, #app.fb-open .screen.active .characters { visibility: hidden; }
+/* q6: the final feedback stays clear of the paper card (x 877+) */
+#feedback-popup.fb-q6 { left: 180px; width: 640px; }
+#feedback-popup.fb-q6.retry { left: 880px; width: 560px; }
+[data-sid="q6"] .q-answers { gap: 0; }       /* PSD: one answer per 38px */
+#feedback-popup.fb-q6.retry { left: 870px; width: 470px; }      /* ends before the question text (x 1357) */
+#feedback-popup.fb-q6.retry { bottom: 215px; }
+
+/* ---- Dashboard legend (screens 12, 13): text and fractions centred in their cells (2026-10-21) ----
+   PSD (stage pixels): names centred at x 1253, fractions at x 1465.5; cell centres y 214.5 / 320 / 420.5 / 526.
+   .diagram-legend starts at x 1040, so those are 213 and 425.5 in its own box. */
+.diagram-legend { top: 0; }
+.diagram-legend li { position: absolute; left: 0; width: 470px; height: 104px; margin: 0; }
+.diagram-legend .lg-1 { top: 162.5px; } .diagram-legend .lg-2 { top: 268px; }
+.diagram-legend .lg-3 { top: 368.5px; } .diagram-legend .lg-4 { top: 474px; }
+.diagram-legend .lg-name { position: absolute; left: 213px; right: auto; top: 50%; width: auto; transform: translate(-50%, -50%);
+  white-space: nowrap; text-align: center; line-height: 1; font-size: 28.3px; }
+.diagram-legend .frac { position: absolute; left: 425.5px; top: 50%; transform: translate(-50%, -50%); font-size: 28.3px; margin: 0; }
+.dash-title { left: 418.5px; width: 330px; top: 97px; transform: translateY(-50%); line-height: 1; }
+
+/* q7: the final feedback starts below the diagram card (its bottom edge is y 588) */
+#feedback-popup.fb-q7 { bottom: 183px; padding-top: 12px; padding-bottom: 12px; }
+#feedback-popup.fb-q7 .fb-body p { line-height: 1.22; }
+/* q3b: the retry message stays left of May (x 461+) now that she remains on screen */
+#feedback-popup.fb-q3b.retry { left: 182px; width: 268px; bottom: 365px; padding-left: 16px; padding-right: 16px; }
+
+/* q4, q5: the conditions card steps aside while the final feedback is open (it sits under the box) */
+#app.fb-open .screen.active .conditions-card { visibility: hidden; }
+
+/* ---- The q5 video in its popup (2026-10-22): a 16:9 player sized to the box ---- */
+#video-q5 .popup-panel { width: auto; max-width: none; padding: 58px 40px 36px; overflow: hidden; }
+#video-q5 .video-wrap { position: relative; inset: auto; width: 1200px; height: 675px; border-radius: 10px; overflow: hidden; }
+#video-q5 .video-wrap video { object-fit: contain; }
+#video-q5 .play-btn-big { width: 220px; height: 224px; }
+#video-q5 .vctrls { left: 0; right: 0; border-radius: 0; }
+#video-q5 .video-caption { padding-bottom: 80px; }
+#video-q5 .video-caption p { font-size: 30px; max-width: 1100px; }
+
+/* ---- Finish box (2026-10-22): larger text, no one-word last line ---- */
+[data-sid="finish"] .finish-text { font-size: 38px; line-height: 1.3; padding: 22px 46px 20px; }
+[data-sid="finish"] .finish-text p { margin: 0 0 8px; text-wrap: balance; }
+[data-sid="finish"] .finish-text p:last-child { margin-bottom: 0; }
+
+/* ---- Q2 feedback (2026-10-25, SME round): the fifths picture fills the box; each label sits over its own fifth ----
+   Drawn in HTML so it stays sharp at the box width and the labels are real, translatable text.
+   Left to right on purpose (the first fifth is the leftmost); the label text itself stays RTL. */
+.fifths-figure { display: grid; grid-template-columns: repeat(5, 1fr); direction: ltr; width: 100%; margin: 6px 0 0; }
+.fifths-figure .ff-label { grid-row: 1; direction: rtl; align-self: end; text-align: center; font-size: 23px; font-weight: 600; line-height: 1.1; padding: 0 2px 4px; text-wrap: balance; }
+.fifths-figure .ff-brace { grid-row: 2; width: calc(100% - 8px); height: 22px; margin: 0 4px 4px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+.fifths-figure .ff-brace path { vector-effect: non-scaling-stroke; }
+.fifths-figure .ff-l1, .fifths-figure .ff-b1 { grid-column: 1; }
+.fifths-figure .ff-l2, .fifths-figure .ff-b2 { grid-column: 2; }
+.fifths-figure .ff-cell { grid-row: 3; display: flex; align-items: center; justify-content: center; height: 80px; border: 2px solid #fff; }
+.fifths-figure .ff-cell + .ff-cell { margin-left: -2px; }
+.fifths-figure .ff-cell .frac { font-size: 34px; }
+
+/* ---- Q2 help 1 (2026-10-25, SME round): each label sits under the piece it names ---- */
+.help-fifths { width: 571px; margin: 18px auto 0; }
+.help-fifths .figure-frame { margin: 0; }
+.hf-labels { display: grid; grid-template-columns: repeat(5, 1fr); direction: ltr; margin-top: 8px; }
+.hf-labels .hf-brace { grid-row: 1; width: calc(100% - 16px); height: 22px; margin: 0 8px 4px; fill: none; stroke: currentColor; stroke-width: 2.5; transform: scaleY(-1); }
+.hf-labels .hf-brace path { vector-effect: non-scaling-stroke; }
+.hf-labels .hf-label { grid-row: 2; direction: rtl; text-align: center; font-size: 28px; line-height: 1.1; padding: 0 2px; text-wrap: balance; }
+.hf-labels .hf-b1, .hf-labels .hf-l1 { grid-column: 1; }
+.hf-labels .hf-b2, .hf-labels .hf-l2 { grid-column: 2; }
+
+/* ---- q4 applet (2026-10-25, SME round): the applet alone in a large window, no cream popup around it ---- */
+#applet-q4 .popup-panel, #applet-q5 .popup-panel { left: 110px; top: 175px; width: 1700px; max-width: none; max-height: none; padding: 0; border: none; border-radius: 30px; background: none; box-shadow: none; overflow: visible; }
+#applet-q4 .applet-frame, #applet-q5 .applet-frame { width: 1700px; height: 880px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,.55); background: #f7f4ea; }
+#applet-q4 .popup-close, #applet-q5 .popup-close { top: 14px; right: 24px; z-index: 2; }
+
+/* ---- q5 (2026-10-25, SME round): one try (yes/no); the help sentence stays on one line ---- */
+#help-q5 > .popup-panel { max-width: none; white-space: nowrap; }
+
+/* ---- q6 (2026-10-25, SME round): question and answers left of the table (it was dead space), the kids under the table ----
+   Right column: title, the table card (nudged up), the kids (bottom on the panel's lower edge, y 917).
+   Left column: the question block, level with the table, and the retry message under it. The final
+   feedback covers the table and the kids (both step aside) so the answers and their marks stay in view. */
+[data-sid="q6"] .q6-ask { position: absolute; left: 130px; top: 276px; width: 660px; }   /* right edge x 790: a clear gap to the table (877) */
+[data-sid="q6"] .plan-card { margin-top: 0; }
+[data-sid="q6"] .characters { left: 1093px; top: 578px; width: 390px; height: 374px; clip-path: inset(0 0 40px 0); }   /* the boy's head touches the table card's lower edge (y 578); the legs are cut at the panel edge (y 912) */
+#feedback-popup.fb-q6 { left: 872px; width: 836px; top: 214px; bottom: auto; }
+#feedback-popup.fb-q6.retry { left: 172px; width: 620px; top: 590px; bottom: auto; }   /* under the answers, above the check button (y 738) */
+#app.fb-open [data-sid="q6"].active .plan-card { visibility: hidden; }
+
+/* ---- 13 diagram-fixed (2026-10-25): new background, the TV and the kids' wall sit 53 px lower so the diagram clears the banner ----
+   (measured by matching the old and new picture: the pie, legend and header bar moved exactly +53 px, 0 px sideways) */
+[data-sid="diagram-fixed"] .dash { top: 53px; }
+[data-sid="diagram-fixed"] .kid-roy { left: 38px; top: 384px; }   /* matched to the developer's mock-up of the new picture */
+[data-sid="diagram-fixed"] .kid-may { top: 381px; }
+
+/* ---- 13 diagram-fixed (2026-10-25, SME round): the top bubble is taller and stands out, as in the PSD (p14) ----
+   PSD: white shape from x 395 to beyond the right edge, white bottom at y 132, a hard black edge 26 px under it
+   and 10 px on its left, running to the right edge and up to the top of the stage. The shape is therefore drawn
+   30 px above and 20 px beyond the stage, so the offset shadow covers the whole visible width and height.
+   Text: the same style as the bubble of screen 2 (33.3 px SemiBold #232020, from .banner); only
+   "הנה הדיאגרמה הנכונה:" is Bold, as in the PSD. */
+[data-sid="diagram-fixed"] .diagram-banner {
+  left: 390px; right: -20px; top: -30px; height: 162px; box-sizing: border-box; padding: 47px 91px 0 57px;
+  display: flex; align-items: center; background: #fff; border-radius: 0 0 0 72px;
+  box-shadow: -10px 25px 0 #000; font-size: var(--text-size); font-weight: 600; line-height: 1.25;   /* = the bubble of screen 2 */
+}
+[data-sid="diagram-fixed"] .diagram-banner strong { font-weight: 700; }
+/* the TV's header title sits behind the bubble in the PSD; without this its lower half peeks out under the black edge */
+[data-sid="diagram-fixed"] .dash-title { visibility: hidden; }
+
+
+
+/* =====================================================================
+   BIGGER WHITE PANEL + LARGER TEXT (SME round 2, 2026-10-29)
+   The white question panel (bg-question.jpg, q7-bg.jpg) is now 1800x798 at 60,120
+   (was 1576x768 at 160,148): the room is used for ONE larger text size on every
+   question screen — questions 40 px, feedback 34 px, feedback headers 46 px
+   (tokens at the top of this file). Text that sits inside the artwork (tables, the
+   conditions card, the map labels) keeps the designer's size.
+   This block comes last on purpose: it re-sets only geometry and sizes, so the
+   earlier rules (colours, behaviour) stay as they were.
+   Panel inner edges: x 60 / 1860, y 120 / 918. Text margin 60: x 120 / 1800.
+   ===================================================================== */
+.q-mark { width: 26px; height: 26px; }
+.q-answers { gap: 8px; }
+.q-opt { gap: 16px; }
+.q-opt.selected .q-mark::after { inset: 6px; }
+
+/* ---- feedback typography: one size for every box, retry included ---- */
+#feedback-popup .fb-title { font-size: var(--fb-title-size); }
+#feedback-popup .fb-body p, #feedback-popup .fb-body li, #feedback-popup .fb-body ol, #feedback-popup .fb-body ul { font-size: var(--fb-size); }
+#feedback-popup .fb-body .fb-table { font-size: 30px; }
+#feedback-popup.retry .fb-title, #feedback-popup.retryPartial .fb-title { font-size: var(--fb-title-size); }
+#feedback-popup.retry .fb-body p, #feedback-popup.retryPartial .fb-body p { font-size: var(--fb-size); }
+#feedback-popup { padding: 20px 36px; }
+#feedback-popup .fb-body p { line-height: 1.32; margin-bottom: 4px; }
+
+/* ---- 3 · q1 ---- */
+[data-sid="q1"] .q-card { top: 160px; width: 780px; }
+[data-sid="q1"] .figure-frame { left: 110px; top: 150px; }
+.map-arrows { transform: translate(-88px, -82px); }
+[data-sid="q1"] .map-side { right: 1727px; top: 341px; }
+[data-sid="q1"] .map-bottom { left: 547px; top: 525px; }
+#feedback-popup.fb-q1 { left: 100px; width: 1240px; bottom: 172px; padding-top: 12px; padding-bottom: 12px; }   /* clear of the map card (ends y 629) */
+#feedback-popup.fb-q1.retry { left: 1020px; width: 780px; bottom: 190px; }
+
+/* ---- 4 · q2 ---- */
+[data-sid="q2"] .q-card { width: 1680px; top: 150px; }
+[data-sid="q2"] .paper-card { left: 930px; top: 362px; height: 520px; }
+[data-sid="q2"] .q-table { left: 978px; top: 438px; }
+[data-sid="q2"] .q-tr { min-height: 106px; }
+[data-sid="q2"] .paper-drone { left: 1722px; top: 377px; }
+[data-sid="q2"] .paper-compass { left: 944px; top: 790px; }
+
+/* ---- 5 · q3a ---- */
+[data-sid="q3a"] .q-card { width: 1680px; top: 150px; }
+[data-sid="q3a"] .paper-card { left: 930px; top: 335px; height: 516px; }
+[data-sid="q3a"] .q-table { left: 978px; top: 411px; }
+[data-sid="q3a"] .paper-drone { left: 1722px; top: 349px; }
+[data-sid="q3a"] .paper-compass { left: 944px; top: 758px; }
+#feedback-popup.fb-q3a { left: 76px; width: 830px; bottom: 180px; }
+#feedback-popup.fb-q3a.retry { left: 76px; width: 830px; bottom: 360px; }
+
+/* ---- 6 · q3b ---- */
+[data-sid="q3b"] .q-card { width: 1680px; top: 150px; }
+[data-sid="q3b"] .paper-card { left: 930px; top: 405px; height: 495px; }
+[data-sid="q3b"] .q-table { left: 978px; top: 481px; }
+[data-sid="q3b"] .q-tr { min-height: 98px; }
+[data-sid="q3b"] .q-tr.q-th { min-height: 74px; }
+[data-sid="q3b"] .paper-drone { left: 1722px; top: 419px; }
+[data-sid="q3b"] .paper-compass { left: 944px; top: 810px; }
+[data-sid="q3b"] .character { left: 550px; top: 470px; }
+#feedback-popup.fb-q3b { left: 76px; width: 830px; bottom: 180px; }
+#feedback-popup.fb-q3b.retry { left: 70px; width: 470px; bottom: 372px; }   /* left of May (x 550+) */
+
+/* ---- 8 · q4 ---- */
+[data-sid="q4"] .q-card { width: 800px; top: 150px; }
+[data-sid="q4"] .q-fields { right: 120px; top: 350px; }
+.conditions-card { left: 470px; top: 190px; }
+#feedback-popup.fb-q4 { left: 100px; width: 1400px; bottom: 180px; }   /* the answers (x 1540+) stay visible */
+#feedback-popup.fb-q4:not(.retry) .fb-body { display: grid; grid-template-columns: 1fr 600px; grid-template-rows: auto auto 1fr; column-gap: 36px; align-items: start; }   /* the steps on the right, the example table on the left */
+#feedback-popup.fb-q4:not(.retry) .fb-body > p:first-child { grid-column: 1 / -1; }
+#feedback-popup.fb-q4:not(.retry) .fb-body > ol { grid-column: 1; grid-row: 2 / span 2; margin: 0; }
+#feedback-popup.fb-q4:not(.retry) .fb-body > p:nth-of-type(2) { grid-column: 2; grid-row: 2; }
+#feedback-popup.fb-q4:not(.retry) .fb-body > .fb-table { grid-column: 2; grid-row: 3; margin-top: 0; width: 100%; }
+#feedback-popup .fb-body .fb-table th, #feedback-popup .fb-body .fb-table td { padding: 6px 8px; }
+#feedback-popup.fb-q4.retry, #feedback-popup.fb-q5.retry { left: 70px; width: 390px; bottom: 372px; }   /* beside the conditions card (x 470+) */
+
+/* ---- 9 · q5 ---- */
+[data-sid="q5"] .q-card { width: 800px; top: 150px; }
+.q-free { width: 800px; font-size: 34px; }
+.q-free-hint { width: 800px; }
+#feedback-popup.fb-q5 { left: 100px; width: 880px; bottom: 180px; }
+/* Screen 9 explains the proposal neutrally; answer-state colors remain on its radio options. */
+#feedback-popup.fb-q5, #feedback-popup.fb-q5 .fb-title { color: #fff; }
+#feedback-popup.fb-q5 .fb-icon, #feedback-popup.fb-q5 .fb-close { display: none; }
+
+/* ---- 10 · q6 ---- */
+[data-sid="q6"] .q6-ask { left: 100px; top: 230px; width: 700px; }   /* RTL text and answer marks move 100 px left, clear of the table/feedback */
+[data-sid="q6"] .characters { left: 1218px; top: 578px; }
+#feedback-popup.fb-q6 { left: 940px; width: 860px; top: 190px; bottom: auto; }
+#feedback-popup.fb-q6.retry { left: 100px; width: 700px; top: 588px; bottom: auto; }
+
+/* ---- 12 · q7 ---- */
+[data-sid="q7"] .q-card { top: 150px; width: 800px; }
+[data-sid="q7"] .dash-card { left: 110px; top: 160px; }
+#feedback-popup.fb-q7 { left: 80px; width: 1720px; bottom: 180px; }
+#feedback-popup.fb-q7.retry { left: 1000px; width: 800px; bottom: 190px; }
+
+/* ---- 14 · q8 ---- */
+[data-sid="q8"] .q-card { width: 800px; top: 150px; }
+[data-sid="q8"] .photo { left: 160px; top: 170px; }
+#feedback-popup.fb-q8 { left: 100px; width: 800px; bottom: 180px; }   /* over the photo's lower part: the answer box (right) stays in view */
+#feedback-popup.fb-q8.retry { left: 960px; width: 840px; bottom: 190px; }
+
+/* q2: the rows' feedback is a larger box over the left of the panel and the row buttons; it carries an X
+   (script.js adds it for row feedback) so the learner closes it once read and the buttons are free again. */
+#feedback-popup.fb-q2 { left: 70px; width: 850px; bottom: 175px; padding: 14px 30px; }
+#feedback-popup .fifths-figure .ff-cell { height: 56px; }
+#feedback-popup .fifths-figure .ff-cell .frac { font-size: 30px; }
+#feedback-popup .fifths-figure .ff-label { font-size: 25px; }
+#feedback-popup.fb-q2 .fb-body p .frac { font-size: .85em; margin-top: -.12em; margin-bottom: -.12em; }
+#feedback-popup.fb-q2.retry { left: 70px; width: 480px; bottom: 360px; }
+#feedback-popup.fb-q2 { background: rgba(28, 28, 30, .97); }
+
+/* q6: the final box (text + the picture) is taller than the others, so its picture is a little smaller */
+#feedback-popup.fb-q6 { top: 214px; padding-top: 14px; padding-bottom: 14px; }
+#feedback-popup.fb-q6 .fb-body .figure-frame { width: 400px; height: 233px; }
+#feedback-popup.fb-q6 .km-figure { width: 400px; }
+#feedback-popup.fb-q6 .km-figure .figure-frame { width: 400px; height: 233px; }
+#feedback-popup.fb-q6 .km-figure .km { top: 106px; width: 58px; padding: 0 8px; font-size: 17px; }
+#feedback-popup.fb-q6 .km-figure .k1 { left: 15px; } #feedback-popup.fb-q6 .km-figure .k2 { left: 95px; } #feedback-popup.fb-q6 .km-figure .k3 { left: 171px; }
+
+/* ---- Close X on a row's feedback (screen 4; script.js adds has-close for part feedback) ---- */
+.fb-close { display: none; position: absolute; top: 14px; left: 16px; width: 48px; height: 48px; padding: 0; border: none; border-radius: 50%;
+  background: rgba(255,255,255,.16); cursor: pointer; }
+.fb-close::before, .fb-close::after { content: ''; position: absolute; top: 50%; left: 50%; width: 26px; height: 4px; border-radius: 2px; background: #fff; }
+.fb-close::before { transform: translate(-50%, -50%) rotate(45deg); }
+.fb-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+.fb-close:hover { background: rgba(255,255,255,.3); }
+#feedback-popup.has-close .fb-close { display: block; }
+#feedback-popup.has-close .fb-title-row { padding-left: 64px; }
+
+/* q2 row help popups: the left edge runs through the pressed button (the table moved 175 px right in all), the middle one
+   is a little narrower so it stays on the stage; its two pictures are smaller to leave the text a column */
+#help-q2-1 .popup-panel, #help-q2-2 .popup-panel, #help-q2-3 .popup-panel { left: 851px; }
+#help-q2-3 .popup-panel { width: 1040px; }
+#help-q2-2 .popup-panel { width: 1060px; padding-left: 560px; }
+#help-q2-2 .figure-frame { left: 80px; width: 460px; height: 266px; }
+#help-q2-2 .figure-frame:nth-of-type(2) { top: 350px; }
+
+/* ---- SME 2026-10-29: upper bubbles use the question screens' text size ---- */
+.banner, [data-sid="diagram-fixed"] .diagram-banner { font-size: var(--text-size); }
+[data-sid="welcome"] .welcome-banner { left: 160px; padding-top: 24px; padding-bottom: 30px; }
+[data-sid="welcome"] .keep-together { white-space: nowrap; }
+/* Narration replaces the old staggered CSS animation; text keeps its space
+   in the bubble while each spoken line fades in. */
+.screen[data-narration] .reveal { animation: none; opacity: 0; visibility: hidden; transform: none; transition: opacity .2s ease; }
+.screen[data-narration] .reveal.is-visible { opacity: 1; visibility: visible; }
+.narration-toggle {
+  position: absolute; left: 20px; top: 24px; width: 64px; height: 64px; padding: 14px;
+  display: flex; align-items: center; justify-content: center;
+  background: #333; color: #fff; border: 2px solid #fff; border-radius: 50%;
+  box-shadow: 0 0 0 1px #333, 0 2px 6px rgba(0,0,0,.25); cursor: pointer;
+}
+.narration-toggle:hover { background: #171717; }
+.narration-toggle:disabled { opacity: .55; cursor: default; }
+.narration-toggle svg { width: 32px; height: 32px; flex: 0 0 auto; fill: currentColor; }
+.narration-toggle .sound-wave { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.narration-toggle .narration-pause, .narration-toggle.is-playing .narration-speaker { display: none; }
+.narration-toggle.is-playing .narration-pause { display: block; }
+@media (prefers-reduced-motion: reduce) { .screen[data-narration] .reveal { transition: none; } }
+/* Zoom the office background and its grid as one scene. The monitor's top
+   lands at y 280, below the text bubble; the complete grid remains on stage. */
+[data-sid="welcome"] .welcome-scene {
+  position: absolute; inset: 0; width: 1920px; height: 1080px;
+  transform-origin: top left; transform: translate(-288px, -78.8px) scale(1.3);
+}
+[data-sid="diagram-fixed"] .diagram-banner { height: 202px; padding-bottom: 22px; }
+[data-sid="diagram-fixed"] { background: url('assets/images/diagram-fixed-bg-new.png') top left / 1920px 1080px no-repeat; }
+[data-sid="diagram-fixed"] .screen-bg { transform: translateY(60px); }
+[data-sid="diagram-fixed"] .dash { top: 113px; }
+[data-sid="diagram-fixed"] .kid-roy { top: 444px; }
+[data-sid="diagram-fixed"] .kid-may { top: 441px; }
+
+/* Q1: retain the original grid pixels, with more space to the left for 40 px labels. */
+[data-sid="q1"] .q1-map { background: url('assets/images/shared-paper-card.png') center / 100% 100% no-repeat; }
+.q1-grid { position: absolute; left: 155px; top: 66px; width: 650px; height: 275px; overflow: hidden; }
+[data-sid="q1"] .q1-grid img { position: absolute; left: -111px; top: -66px; width: 867px; height: 478px; max-width: none; }
+[data-sid="q1"] .q1-drone { position: absolute; left: 754px; top: 12px; width: 100px; z-index: 3; }
+[data-sid="q1"] .q1-compass { position: absolute; left: 14px; bottom: 32px; width: 80px; }
+[data-sid="q1"] .q1-map .map-arrows { width: 100%; height: 100%; transform: none; }
+[data-sid="q1"] .map-label { font-size: var(--text-size); line-height: 1.2; }
+[data-sid="q1"] .map-side { left: 18px; right: auto; top: 179px; width: 104px; text-align: center; }
+[data-sid="q1"] .map-bottom { left: 480px; top: 381px; }
+
+/* Final marks share the radio's centre, including when the option is selected.
+   The state selectors outrank the selected-dot inset rule. */
+.q-opt:is(.correct, .wrong) .q-mark::after {
+  content: ''; inset: auto; left: 50%; top: 50%; right: auto; bottom: auto;
+  width: 28px; height: 26px; transform: translate(-50%, -50%); border-radius: 0;
+}
+.q-opt.correct .q-mark::after { background: url('assets/images/ui-check-mark.png') center / contain no-repeat; }
+.q-opt.wrong .q-mark::after {
+  width: 24px; height: 24px;
+  background: linear-gradient(45deg, transparent 44%, currentColor 46% 54%, transparent 56%),
+              linear-gradient(-45deg, transparent 44%, currentColor 46% 54%, transparent 56%);
+}
+
+/* ---- SME follow-up 2026-10-29: full-width Q1 feedback and the Q2 mockup ---- */
+/* The two short explanation paragraphs share the final line. At 46 px the
+   three body lines and 54 px title fit below the map, inside the white panel. */
+#feedback-popup.fb-q1:not(.retry) { left: 70px; width: 1780px; padding: 12px 32px; }
+#feedback-popup.fb-q1:not(.retry) .fb-title { font-size: 54px; line-height: 1.2; }
+#feedback-popup.fb-q1:not(.retry) .fb-body { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+#feedback-popup.fb-q1:not(.retry) .fb-body p { font-size: 46px; line-height: 1.18; margin: 0; }
+#feedback-popup.fb-q1:not(.retry) .fb-body p:first-child { flex: 0 0 100%; }
+
+/* Screens 4–6 share the enlarged card/table sizes. The smaller drone/clips
+   sit in front of the upper-right corner, clear of the header lettering. */
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .paper-card { left: 750px; width: 1110px; height: 540px; }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .q-table { left: 800px; top: 420px; width: 1008px; font-size: 34px; z-index: 5; }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .paper-drone { left: 1766px; width: 84px; height: auto; z-index: 8; filter: drop-shadow(1px 3px 2px rgba(0,0,0,.5)); }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .q-tr { grid-template-columns: 220px repeat(3, minmax(0, 1fr)); min-height: 112px; }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .q-tr.q-th { min-height: 96px; font-size: 34px; line-height: 1.15; }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .q-tr.q-opt { font-size: inherit; }
+:is([data-sid="q2"], [data-sid="q3a"], [data-sid="q3b"]) .q-tr .frac { font-size: 40px; }
+[data-sid="q2"] .q-in { width: 82px; height: 42px; font-size: 36px; }
+/* Q2's larger help discs have their own taller row pitch; screens 5/6 keep
+   the shared 112 px rows. The header stays 96 px tall. */
+[data-sid="q2"] .q-table { top: 402px; }
+[data-sid="q2"] .paper-card { top: 350px; height: 575px; }   /* contain the table inside the painted green frame, not just the PNG bounds */
+[data-sid="q2"] .paper-drone { top: 374px; }
+[data-sid="q2"] .q-tr { min-height: 126px; }
+[data-sid="q2"] .q-tr.q-th { min-height: 96px; }
+[data-sid="q2"] .q-part .help-btn { left: -185px; width: 136px; height: 137px; margin-top: -68.5px; padding-bottom: 23px; font-size: 34px; }
+[data-sid="q2"] .q-part .btn-check { left: -377px; }
+[data-sid="q2"] .paper-compass { left: 764px; top: 810px; }
+
+/* All Q2 feedback stays left of the table (x 800). The final panel can overlap
+   the buttons and the left of the question; its existing X frees that space. */
+#feedback-popup.fb-q2 { left: 70px; width: 700px; padding: 14px 24px; }
+/* Each retry is centred on its row: table y 402 + border 2.5 + header 96
+   + half a 126 px row, then one row's pitch for each subsequent option. */
+#feedback-popup.fb-q2.retry { left: 70px; width: 530px; top: 563.5px; bottom: auto; transform: translateY(-50%); padding: 12px 18px; }
+#feedback-popup.fb-q2-p2.retry { top: 689.5px; }
+#feedback-popup.fb-q2-p3.retry { top: 815.5px; }
+#feedback-popup.fb-q2.retry .fb-title { font-size: 36px; line-height: 1.2; }
+#feedback-popup.fb-q2.retry .fb-body p { font-size: 32px; line-height: 1.25; margin: 0; }
+#feedback-popup.fb-q2 .fifths-figure .ff-cell { height: auto; min-height: 100px; padding: 10px 4px; }
+#feedback-popup.fb-q2 .fifths-figure .ff-cell .frac { font-size: 34px; }
+#help-q2-1 .popup-panel, #help-q2-2 .popup-panel, #help-q2-3 .popup-panel { left: 673px; }
+
+/* Screen 5 retains its higher card; screen 6 uses screen 4's vertical layout. */
+[data-sid="q3a"] .q-table { top: 393px; }
+[data-sid="q3a"] .paper-drone { top: 365px; }
+[data-sid="q3a"] .paper-compass { left: 764px; top: 783px; }
+[data-sid="q3b"] .paper-card { top: 362px; }
+[data-sid="q3b"] .paper-drone { top: 392px; }
+[data-sid="q3b"] .paper-compass { left: 764px; top: 810px; }
+[data-sid="q3b"] .character { left: 370px; }
+/* Both feedback columns end before the enlarged tables, including retries. */
+#feedback-popup.fb-q3a, #feedback-popup.fb-q3a.retry,
+#feedback-popup.fb-q3b, #feedback-popup.fb-q3b.retry { left: 70px; width: 700px; }
+
+/* ---- SME 2026-10-29: character crop, applet emphasis, table and chart labels ---- */
+/* The enlarged upper body ends at the white panel's lower edge, above the jeans. */
+[data-sid="q3b"] .character { left: 250px; top: 375px; width: 500px; height: auto; clip-path: inset(0 0 27% 0); }
+
+[data-sid="q4"] .applet-btn, [data-sid="q5"] .applet-btn { left: 215px; top: 0; width: 224px; height: 225px; padding-bottom: 36px; font-size: 42px; font-weight: 800; }
+#help-q4 > .popup-panel { left: 445px; }
+
+/* Q6 uses the same label/fraction sizes as the earlier tables. A wider first
+   column keeps its longer row heading on two lines, without crowding the answers. */
+[data-sid="q6"] .plan-card { width: 907px; }
+[data-sid="q6"] .plan-table { width: 792px; font-size: 34px; line-height: 1.15; }
+[data-sid="q6"] .plan-table th:nth-child(n), [data-sid="q6"] .plan-table td:nth-child(n) { width: auto; }
+[data-sid="q6"] .plan-table th:first-child, [data-sid="q6"] .plan-table td:first-child { width: 210px; }
+[data-sid="q6"] .plan-table th { font-weight: 600; }
+[data-sid="q6"] .plan-table tr:first-child { height: 96px; }
+[data-sid="q6"] .plan-table tr:first-child th { font-weight: 700; }
+[data-sid="q6"] .plan-table tr:last-child { height: 112px; }
+[data-sid="q6"] .plan-table .frac { font-size: 40px; }
+[data-sid="q6"] .plan-notepad { left: auto; right: 16px; }
+
+/* Q7: the supplied complete chart replaces the previous HTML composition. */
+[data-sid="q7"] .q7-image { left: 100px; top: 150px; width: 860px; height: auto; }
+
+/* ---- SME 2026-11-10 ---- */
+/* Screen 6 help popup: much larger text, labels included. The panel is wider to make room;
+   each label stays vertically centred on its own picture (the rows are centre-aligned flex rows). */
+#help-q3b .popup-panel { left: 212px; top: 22px; width: 1650px; max-width: none; height: 930px;
+  padding: 84px 70px 40px 930px; font-size: 48px; line-height: 1.25; }
+#help-q3b .popup-panel p { margin: 0 0 18px; }
+#help-q3b .help-options { left: 110px; top: 70px; gap: 24px; }
+#help-q3b .help-option { gap: 36px; }
+#help-q3b .help-option p { width: 320px; margin: 0; font-size: 48px; line-height: 1.1; }
+#help-q3b .help-option .frac { font-size: 54px; }
+
+/* Screens 8 and 9: the reminder under the conditions note. It lives inside the note's box, so it
+   moves with the note and hides with it while a feedback box is open. The note is raised to make
+   room for it above the white panel's lower edge. */
+.conditions-card { top: 136px; }
+.cond-reminder {
+  position: absolute; left: 0; right: 0; top: calc(100% + 10px); margin: 0;
+  padding: 9px 16px;
+  background: #3A5833; color: #fff;                        /* the green of the note's title ribbon */
+  border: 3px solid #2F4627; border-radius: 10px;
+  box-shadow: inset 0 0 0 2px #F3EBD8, 0 4px 10px rgba(0,0,0,.25);   /* thin paper line inside, like the note's double frame */
+  font-size: 36px; font-weight: 600; line-height: 1.2; text-align: center; text-wrap: balance;
+}
+.cond-em { font-weight: 800; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+
+/* Screen 9 now has the יישומון button too (as screen 8): its help popup opens to the right of it, not over it. */
+#help-q5 > .popup-panel { left: 445px; }
+
+/* ---- The end of the lomda: the dark "back to the Moodle" screen (house ending; from the starter) ----
+   Covers the whole stage, above everything. Shown by showReturnScreen() when the finish popup is closed. */
+#final-return { position: absolute; inset: 0; z-index: 400; }
+#final-return[hidden] { display: none; }
+#final-return:focus { outline: none; }
+#final-return { display: flex; align-items: center; justify-content: center; background: #000; color: #fff; text-align: center; }
+#final-return p { margin: 0; width: 1700px; font-size: 82px; line-height: 1.5; font-weight: 700; }

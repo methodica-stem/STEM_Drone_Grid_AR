@@ -1,0 +1,131 @@
+/* ============================================================
+   style-ar.css — Arabic build layout overrides.
+   Loaded AFTER styles.css, which stays byte-identical to the
+   Hebrew build so any future Hebrew fix copies straight across.
+   Typeface lives in fonts-ar.css. Every override says which
+   screen it is for and what was measured.
+   ============================================================ */
+
+/* ── Orphans ──────────────────────────────────────────────────
+   Arabic's longer words leave a lone word on a last line more often
+   than Hebrew did. text-wrap:pretty asks the browser to rebalance the
+   closing lines; no change to size or box. */
+p, .q-body, .fb-body p { text-wrap: pretty; }
+
+/* ── Help button (every question) ─────────────────────────────
+   The Hebrew label עזרה (4 letters) is 36px bold in a round button of 162px (137px in the table rows). "مساعدة"
+   at the same size was wider than the dark face and ran over its rim. Same weight, smaller size, one line. */
+.help-btn { font-size: 27px; white-space: nowrap; letter-spacing: 0; }
+.q-part .help-btn, [data-sid="q2"] .q-part .help-btn { font-size: 22px; }
+.applet-btn { white-space: nowrap; }
+
+/* ── The conditions card (screens 8 and 9) ─────────────────────
+   The two notes are live text laid over the card picture, on two paper patches that hide the painted Hebrew.
+   The Arabic notes are longer (5 lines + 4 lines at 29px), so the patches grew over the painted dashed line
+   and the second note started below the painted second bullet, which showed between them. Smaller type and a
+   tighter patch keep the first note on y 165-295 and the second on 317-470 of the card (the painted
+   bullets sit on 175-285 and 335-460), clear of the painted drone at 480.                                */
+.conditions-card { padding-top: 165px; font-size: 24px; line-height: 1.15; }
+.conditions-card li { margin: 0 0 22px; padding: 5px 9px; }
+.conditions-card li + li { padding-top: 5px; }
+
+/* ── Screen 13: the pie legend (4 rows of 104px) ───────────────
+   "مسارات الوصول للمعتنين والمعتنيات" at 28px on one line ran under the fraction. Two lines at 24px, centred
+   in the label cell (330px wide, as the cell between the colour swatch and the fraction).                  */
+.diagram-legend .lg-name { white-space: normal; width: 330px; font-size: 25px; line-height: 1.15; }
+
+/* The conditions card: the painted second bullet runs down to y 475 (its third line is "משטח השמורה."); the Arabic
+   note is shorter than that, so its paper patch is made taller to cover it (top and bottom padding), stopping
+   before the painted drone at y 480. */
+.conditions-card li:last-child { padding: 36px 9px 40px; }
+
+/* ── Table header "جزء المساحة الذي سيُمسح" (screens 4, 5, 6, 10) ─────────
+   The Hebrew "חלק השטח שייסרק" is two lines in the first column. The Arabic wrapped to three, with "سيُمسح" alone on
+   the last line, which made the header row taller and pushed the last row of Q2 over the edge of the paper card
+   (and the three help buttons into each other). 25px and balanced lines: two lines, as in the Hebrew.          */
+.q-th > span:first-child, .plan-table th:first-child { font-size: 25px; text-wrap: balance; }
+
+/* ── Check button ("هل إجابتي صحيحة؟"), every question ─────────────────
+   Hebrew "צדקתי?" is one short word at 42px on a 235x154 chalkboard (168x110 in the table rows). The Arabic
+   sentence is four words: it wrapped to two lines that ran onto the chalk frame. The board keeps its size and
+   place (on Q4 and Q5 it sits just left of the reminder box, so it cannot grow); the type is smaller and
+   padded inside the frame, two balanced lines.                                                          */
+.btn-check { font-size: 29px; line-height: 1.2; padding: 0 30px 30px; text-wrap: balance; }
+.q-part .btn-check, [data-sid="q2"] .q-part .btn-check { font-size: 22px; line-height: 1.15; padding: 0 22px 22px; }
+
+/* ── Q1 final panel: clear of the third answer ─────────────────────────
+   The Hebrew panel sets its text at 46px (title 54px): three short lines. The Arabic explanation is four lines at
+   that size, so the panel grew up over "10 كم" (answers end at y 620). At 35px (title 50px) it starts below
+   them. Final outcome only.                                                                              */
+#feedback-popup.fb-q1:not(.retry) .fb-body p { font-size: 35px; line-height: 1.2; }
+#feedback-popup.fb-q1:not(.retry) .fb-title { font-size: 50px; }
+
+/* ── Q6 retry panel: below the answers ─────────────────────────────────
+   The Arabic retry text takes two lines for the title and two for the hint, so the panel (top 588) covered the
+   last answer "36 كم²". Moved to 640; it still ends above the card's lower edge.                       */
+#feedback-popup.fb-q6.retry { top: 692px; }
+#feedback-popup.fb-q6.retry .fb-title { font-size: 38px; }
+#feedback-popup.fb-q6.retry .fb-body p { font-size: 28px; }
+
+/* ── Q6: the check button beside the answers ───────────────────────────
+   With the units spelled out ("36 كيلومترا مربّعا") the question takes five lines, so the answers end at y 676 and
+   the retry panel can only start below them, where the Hebrew check button sits (left 227, top 738). The button
+   moves up beside the answers, into the free space left of their text (which starts at x 470).              */
+[data-sid="q6"] .btn-check { left: 150px; top: 508px; }
+
+/* ── Q6 final panel (units spelled out) ────────────────────────────────
+   "12 كيلومترا مربّعا" is longer than "12 קמ"ר": the explanation took seven lines at 34px and the panel ran past the
+   card's lower edge, and the three labels on the little picture took three lines in their blue tiles. Text 28px,
+   labels 13px on three short lines, tiles re-centred.                                                      */
+#feedback-popup.fb-q6:not(.retry) .fb-body p { font-size: 28px; line-height: 1.2; }
+#feedback-popup.fb-q6:not(.retry) .fb-title { font-size: 42px; }
+#feedback-popup.fb-q6 .km-figure .km { top: 100px; width: 68px; padding: 0 2px; font-size: 13px; line-height: 1.15; }
+#feedback-popup.fb-q6 .km-figure .k1 { left: 10px; } #feedback-popup.fb-q6 .km-figure .k2 { left: 90px; } #feedback-popup.fb-q6 .km-figure .k3 { left: 166px; }
+
+/* ── Q1: a bigger map card, so the side label "5 كيلومترات" fits at a readable size (reviewer, 2026-11-12) ─────────────
+   The card grows 42px to the left and 32px to the right (it ends at x 1008, the question text starts at 1020); everything
+   drawn on it keeps its size and moves by the same amount, so the arrows still sit on the grid. The left strip, between the card's
+   edge and the vertical arrow, is 165px wide: the label takes it, two lines at 32px.                                */
+[data-sid="q1"] figure.q1-map { left: 68px; width: 940px; }
+[data-sid="q1"] .q1-grid { left: 197px; }
+[data-sid="q1"] .q1-map .map-arrows { left: 42px; width: 866px; height: 100%; }
+[data-sid="q1"] .q1-drone { left: 828px; }
+[data-sid="q1"] .map-bottom { left: 522px; }
+[data-sid="q1"] .map-side { white-space: normal; font-size: 32px; line-height: 1.2; left: 6px; width: 160px; top: 160px; }
+
+/* Q1 second try: the retry panel sits under the map card, on the left, where there is room; the check button moves
+   beside the answers (free space left of their text), so the panel does not cover it.                          */
+#feedback-popup.fb-q1.retry { left: 80px; width: 900px; top: 655px; bottom: auto; }
+[data-sid="q1"] .btn-check { left: 1230px; top: 520px; }
+
+/* ── Screen 9: the question's fraction needs air ───────────────────────────────────────────────────────
+   "...في اليوم 2/5 من مساحة المحمية" : the fraction's numerator touched the line above (line height 1.22). */
+[data-sid="q5"] .q-body { line-height: 1.55; }
+
+/* ── The conditions note (screens 8, 9): larger text ───────────────────────────────────────────────────── */
+.conditions-card { font-size: 26px; line-height: 1.14; }
+.conditions-card li:last-child { padding: 5px 9px; min-height: 168px; box-sizing: border-box; }   /* the patch still reaches the painted bullet's last line (card y 478) */
+
+/* ── Helps: no single word on a last line ──────────────────────────────────────────────────────────────
+   Paragraphs of a help are balanced (the lines are made about equally long). Q5's help is one line: the panel starts
+   further left (still right of the applet button) and the text is a little smaller. Q2's second help is wider.        */
+.popup-panel p { text-wrap: balance; }
+#help-q5 > .popup-panel { left: 440px; }
+#help-q5 .popup-panel p { font-size: 36px; white-space: nowrap; }
+#help-q2-2 .popup-panel { width: 1200px; }
+
+/* ── Q6 final panel: as large as it can be (reviewer, 2026-11-12) ───────────────────────────────────────
+   The panel is wider (it may cover the table, not the question text, which ends at x 800), and the little picture is 1.5 times
+   bigger (600x350), with its labels in proportion, so "12 كيلومترا مربّعا" can be read.                              */
+#feedback-popup.fb-q6:not(.retry) { left: 830px; width: 1000px; top: 205px; }
+#feedback-popup.fb-q6 .km-figure { width: 580px; }
+#feedback-popup.fb-q6 .km-figure .figure-frame { width: 580px; height: 338px; }
+#feedback-popup.fb-q6 .km-figure .km { top: 148px; width: 76px; padding: 0; font-size: 18px; line-height: 1.15; }
+#feedback-popup.fb-q6 .km-figure .k1 { left: 21px; } #feedback-popup.fb-q6 .km-figure .k2 { left: 135px; } #feedback-popup.fb-q6 .km-figure .k3 { left: 249px; }
+#feedback-popup.fb-q6:not(.retry) .fb-body p { font-size: 31px; line-height: 1.2; }
+#feedback-popup.fb-q6:not(.retry) .fb-title { font-size: 46px; }
+#feedback-popup.fb-q6 .km-figure { margin-top: 2px; width: 540px; }
+#feedback-popup.fb-q6 .km-figure .figure-frame { width: 540px; height: 315px; }
+#feedback-popup.fb-q6 .km-figure .km { top: 138px; width: 70px; font-size: 17px; }
+#feedback-popup.fb-q6 .km-figure .k1 { left: 20px; } #feedback-popup.fb-q6 .km-figure .k2 { left: 126px; } #feedback-popup.fb-q6 .km-figure .k3 { left: 232px; }
+#feedback-popup.fb-q6:not(.retry) { top: 200px; }

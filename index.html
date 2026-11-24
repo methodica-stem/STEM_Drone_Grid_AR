@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عمليّة رسم خريطة محمية اللوز الطبيعيّة</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="fonts-ar.css">
+<link rel="stylesheet" href="style-ar.css">
+</head>
+<body>
+<div id="app" role="main">
+
+<!-- ===================================================================
+     One <section> per screen, numbered 1..N with no gaps, written out in
+     full here (the QA system counts the sections in this file).
+     Attribute order matters to the translation tools: class first, then
+     data-screen.
+       data-sid    short ASCII name, stable when screens are renumbered
+       data-type   opening | explain | video | tiles | hub | question | applet | finish
+     Banner comment per screen: number, title, storyboard slides.
+
+     Planned parts the engine gets in Phase 4 (markup is final already):
+       .help-btn[data-popup="id"] / .popup-src#id   — help, applet, video and finish popups
+       data-kind="input", .q-input[data-answer]      — typed answers; data-match="value" = any equal fraction
+       .q-part                                       — a row with its own check, help and feedback (q2)
+       .q-tr.q-opt                                   — a table row as an answer option (q3a, q3b)
+     =================================================================== -->
+
+<!-- ================= SCREEN 1 — סרטון פתיחה — מנהל השמורה (שקפים 2-3) ================= -->
+<section class="screen active" data-screen="1" data-sid="video-intro" data-type="video" tabindex="-1">
+  <div class="video-wrap">
+    <!-- the poster (data-poster) only shows if the video file is missing; otherwise its first frame shows -->
+    <video class="video-el" playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noremoteplayback nofullscreen noplaybackrate" data-poster="assets/images/video-intro-poster.jpg" data-preview-at="0.5"><source src="assets/videos/RAHFAN_RESHET_CLIP1_V3.mp4#t=0.001" type="video/mp4"></video>
+    <!-- captions: the producer's SRT (RAHFAN_RESHET_CLIP*.srt), one span per cue -->
+    <div class="vcap-src" data-clear-after="48.72" hidden>
+        <span data-t="0" data-end="1.6">مرحبا بكم،</span>
+        <span data-t="1.6" data-end="4.1">تلقّينا في الأيام الأخيرة تقارير عن تغيّرات</span>
+        <span data-t="4.1" data-end="5.908">في منطقة محمية اللوز الطبيعيّة</span>
+        <span data-t="5.909" data-end="8.32">جفّت بعض مصادر المياه</span>
+        <span data-t="8.32" data-end="11.54">وبدأت الحيوانات تتحرّك بشكل غير معتاد</span>
+        <span data-t="11.54" data-end="14.06">بحثا عن مصادر مياه جديدة</span>
+        <span data-t="14.06" data-end="17.24">لكي نفهم ما تغيّر ونحمي الحيوانات البرّية</span>
+        <span data-t="17.24" data-end="19.54">علينا أن نعيد رسم خريطة لجميع</span>
+        <span data-t="19.54" data-end="21.87">أنحاء المحمية، باستخدام طائرة مسيّرة للمسح</span>
+        <span data-t="21.87" data-end="23.94">وهنا سنحتاج إلى مساعدتكم</span>
+        <span data-t="23.94" data-end="26.5">انضمّوا إلى فريقنا من علماء البيئة الصغار</span>
+        <span data-t="26.5" data-end="28.34">طلّاب وطالبات مثلكم</span>
+        <span data-t="28.34" data-end="30.94">وساعدونا في تخطيط مهمّة المسح</span>
+        <span data-t="30.94" data-end="33.82">يهمّنا أن تعرفوا عند تخطيط المسح</span>
+        <span data-t="33.82" data-end="36.48">طائرتنا المسيّرة ذات بطّاريّة محدودة</span>
+        <span data-t="36.48" data-end="39.18">ولا تستطيع مسح المحمية كلّها في يوم واحد</span>
+        <span data-t="39.18" data-end="41.02">هذا يعني أنّنا سنحتاج إلى تقسيم</span>
+        <span data-t="41.02" data-end="42.795">المهمّة إلى 3 أيام مسح</span>
+        <span data-t="42.796" data-end="45.89">ننهي في نهايتها رسم خريطة المنطقة كلّها</span>
+        <span data-t="45.89" data-end="48.72">هل أنتم مستعدّون؟ هيّا نبدأ</span>
+      </div>
+    <div class="video-caption hidden"><p></p></div>
+    <button class="play-btn-big" type="button" aria-label="تشغيل الفيديو"></button>
+  </div>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 2 — ברוכים הבאים למערכת הבקרה (שקף 4) ================= -->
+<section class="screen" data-screen="2" data-sid="welcome" data-type="explain" data-narration tabindex="-1">
+  <div class="welcome-scene">
+    <img class="screen-bg" src="assets/images/welcome-bg.jpg" alt="">
+    <img class="figure-frame reserve-map" src="assets/images/welcome-map.jpg" alt="خريطة المحمية مقسّمة إلى شبكة من المربّعات المتساوية: 5 صفوف و12 عمودا.">
+  </div>
+  <div class="banner welcome-banner">
+    <p class="reveal" data-narration-at="0"><strong>أهلا بكم في نظام التحكّم بالطائرة المسيّرة.</strong></p>
+    <p class="reveal" data-narration-at="3.32">محميّتنا مستوية السطح وعلى شكل مستطيل.</p>
+    <p class="reveal" data-narration-at="6.06">يقسّم النظام المنطقة إلى شبكة رقميّة من المربّعات المتساوية لتخطيط المسح.</p>
+    <p class="reveal" data-narration-at="12.42">مهمّتكم، بصفتكم مخطّطي عمليّة المسح، هي أن تحدّدوا كيف سيُوزَّع عمل المسح بين <span class="keep-together">أيام العمليّة الثلاثة.</span></p>
+    <button class="narration-toggle" type="button" aria-label="تشغيل السرد الصوتي" aria-controls="welcome-narration" aria-pressed="false">
+      <svg class="narration-speaker" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M5 12h6l8-6v20l-8-6H5z"/><path class="sound-wave" d="M23 11a7 7 0 0 1 0 10M26 7a12 12 0 0 1 0 18"/></svg>
+      <svg class="narration-pause" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="8" y="7" width="6" height="18" rx="1"/><rect x="19" y="7" width="6" height="18" rx="1"/></svg>
+    </button>
+  </div>
+  <audio class="narration-audio" id="welcome-narration" src="assets/audio/screen2-narration.mp3" preload="auto"></audio>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 3 — שאלה 1 — אורך הצלע הסמוכה (שקפים 5-6) ================= -->
+<section class="screen" data-screen="3" data-sid="q1" data-type="question" data-kind="single" data-weight="12.5" data-step="1" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q1">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body">1. عليكم أن تتعرّفوا إلى أبعاد المحمية لكي تتمكّنوا من تخطيط مهمّة المسح جيّدا.</p>
+    <p class="q-body">معلوم أنّ مساحة المحمية المستطيلة هي 60 كيلومترا مربّعا، وطول أحد أضلاعها 5 كيلومترات.</p>
+    <p class="q-body"><strong>ما هو طول الضلع المجاور؟</strong></p>
+    <p class="q-instruction">اختاروا الإجابة المناسبة.</p>
+    <div class="q-answers" role="radiogroup" aria-label="خيارات الإجابة">
+      <div class="q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>15 كيلومترا</div>
+      <div class="q-opt" data-id="2" data-correct role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>12 كيلومترا</div>
+      <div class="q-opt" data-id="3" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>10 كيلومترات</div>
+    </div>
+  </div>
+  <!-- Separate existing artwork layers leave room for full-size dimension labels. -->
+  <figure class="figure-frame q1-map" role="img" aria-label="خريطة المحمية المستطيلة، مقسّمة إلى مربّعات. طول ضلع واحد 5 كيلومترات، وطول الضلع المجاور غير معروف.">
+    <div class="q1-grid"><img src="assets/images/q1-map.png" alt=""></div>
+    <img class="q1-drone" src="assets/images/shared-paper-drone.png" alt="">
+    <img class="q1-compass" src="assets/images/shared-paper-compass.png" alt="">
+    <svg class="map-arrows" viewBox="0 0 866 479" aria-hidden="true" focusable="false">
+      <line x1="135" y1="72" x2="135" y2="335" />
+      <polygon points="128.5,77 141.5,77 135,66" />
+      <polygon points="128.5,330 141.5,330 135,341" />
+      <line x1="161" y1="366" x2="799" y2="366" />
+      <polygon points="167,358 167,374 155,366" />
+      <polygon points="793,358 793,374 805,366" />
+    </svg>
+    <p class="map-label map-side">5 كيلومترات</p>
+    <p class="map-label map-bottom">؟ كيلومتر</p>
+  </figure>
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q1" hidden>
+    <p>مساحة المستطيل هي حاصل ضرب طولَي ضلعين متجاورين.</p>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>مساحة المستطيل هي حاصل ضرب طولَي الضلعين المجاورين. معلوم لدينا أنّ مساحة المحمية 60 كيلومترا مربّعا وطول أحد أضلاعها 5 كيلومترات.</p><p>نُجري عمليّة قسمة لإيجاد طول الضلع المجاور:</p><p>12 = 5 : 60 ونحصل على أنّ طول الضلع هو 12 كيلومترا.</p></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>مساحة المستطيل هي حاصل ضرب طولَي الضلعين المجاورين. معلوم لدينا أنّ مساحة المحمية 60 كيلومترا مربّعا وطول أحد أضلاعها 5 كيلومترات.</p><p>نُجري عمليّة قسمة لإيجاد طول الضلع المجاور:</p><p>12 = 5 : 60 ونحصل على أنّ طول الضلع هو 12 كيلومترا.</p></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 4 — שאלה 2 — החלק שנותר ביום השלישי (שקפים 7-13) ================= -->
+<section class="screen" data-screen="4" data-sid="q2" data-type="question" data-kind="input" data-weight="12.5" data-step="2" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <div class="q-card">
+    <p class="q-body">2. كما ذُكر، يجب تقسيم مسح مساحة المحمية على ثلاثة أيام.</p>
+    <p class="q-body">اقترح طاقم المخطّطين ثلاثة خيارات لتقسيم مساحة المحمية، وهي معروضة في الجدول التالي.</p>
+    <p class="q-body"><strong>ما الجزء من مساحة المحمية الذي يتبقّى للمسح في اليوم الثالث في كلّ خيار منها؟</strong></p>
+    <p class="q-instruction">اكتبوا الإجابة المناسبة لكلّ خيار.</p>
+  </div>
+  <img class="paper-card" src="assets/images/shared-paper-card.png" alt="">
+  <img class="paper-art paper-drone" src="assets/images/shared-paper-drone.png" alt="">
+  <img class="paper-art paper-compass" src="assets/images/shared-paper-compass.png" alt="">
+  <div class="q-table" role="table">
+    <div class="q-tr q-th" role="row"><span role="columnheader">جزء المساحة الذي سيُمسح</span><span role="columnheader">اليوم الأول</span><span role="columnheader">اليوم الثاني</span><span role="columnheader">اليوم الثالث</span></div>
+
+    <div class="q-tr q-part" role="row" data-part="1">
+      <span role="rowheader">الخيار 1</span>
+      <span role="cell"><span class="frac"><span>1</span><span>5</span></span></span>
+      <span role="cell"><span class="frac"><span>1</span><span>5</span></span></span>
+      <span role="cell"><span class="q-input frac-input" data-answer="3/5" data-match="value"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></span>
+      <button class="help-btn" type="button" data-popup="help-q2-1">مساعدة</button>
+      <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+      <div class="fb-src" hidden>
+        <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+        <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p><strong>هيّا ننظر إلى خيار المسح الأول.</strong></p><p>يمثّل كلّ جزء في الرسم خُمس مساحة المحمية، فقد تمّ مسح <span class="frac"><span>1</span><span>5</span></span> من مساحة المحمية في اليوم الأول، وتمّ مسح <span class="frac"><span>1</span><span>5</span></span> من المساحة في اليوم الثاني أيضا.</p><p>يعني ذلك أنّه تمّ مسح <span class="frac"><span>2</span><span>5</span></span> من مساحة المحمية في اليومين الأولين معا، ولذلك ما زال يتبقّى للمسح في اليوم الثالث <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية.</p><div class="fifths-figure" role="img" aria-label="رسم: مساحة المحمية في خمسة أجزاء متساوية. في الخُمس الأول من اليسار مكتوب 1/5، وهو الجزء الذي مُسح في اليوم الأول، وفي الخُمس الثاني مكتوب 1/5، وهو الجزء الذي مُسح في اليوم الثاني."><span class="ff-label ff-l1">الجزء الذي مُسح في اليوم الأول</span><span class="ff-label ff-l2">الجزء الذي مُسح في اليوم الثاني</span><svg class="ff-brace ff-b1" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg><svg class="ff-brace ff-b2" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg><span class="ff-cell"><span class="frac"><span>1</span><span>5</span></span></span><span class="ff-cell"><span class="frac"><span>1</span><span>5</span></span></span><span class="ff-cell"></span><span class="ff-cell"></span><span class="ff-cell"></span></div></div>
+        <div data-fb="wrong2"><p class="fb-t">الإجابة غير دقيقة<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p><strong>هيّا ننظر إلى خيار المسح الأول.</strong></p><p>يمثّل كلّ جزء في الرسم خُمس مساحة المحمية، فقد تمّ مسح <span class="frac"><span>1</span><span>5</span></span> من مساحة المحمية في اليوم الأول، وتمّ مسح <span class="frac"><span>1</span><span>5</span></span> من المساحة في اليوم الثاني أيضا.</p><p>يعني ذلك أنّه تمّ مسح <span class="frac"><span>2</span><span>5</span></span> من مساحة المحمية في اليومين الأولين معا، ولذلك ما زال يتبقّى للمسح في اليوم الثالث <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية.</p><div class="fifths-figure" role="img" aria-label="رسم: مساحة المحمية في خمسة أجزاء متساوية. في الخُمس الأول من اليسار مكتوب 1/5، وهو الجزء الذي مُسح في اليوم الأول، وفي الخُمس الثاني مكتوب 1/5، وهو الجزء الذي مُسح في اليوم الثاني."><span class="ff-label ff-l1">الجزء الذي مُسح في اليوم الأول</span><span class="ff-label ff-l2">الجزء الذي مُسح في اليوم الثاني</span><svg class="ff-brace ff-b1" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg><svg class="ff-brace ff-b2" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg><span class="ff-cell"><span class="frac"><span>1</span><span>5</span></span></span><span class="ff-cell"><span class="frac"><span>1</span><span>5</span></span></span><span class="ff-cell"></span><span class="ff-cell"></span><span class="ff-cell"></span></div></div>
+      </div>
+    </div>
+
+    <div class="q-tr q-part" role="row" data-part="2">
+      <span role="rowheader">الخيار 2</span>
+      <span role="cell"><span class="frac"><span>1</span><span>10</span></span></span>
+      <span role="cell"><span class="frac"><span>2</span><span>5</span></span></span>
+      <span role="cell"><span class="q-input frac-input" data-answer="5/10" data-match="value"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></span>
+      <button class="help-btn" type="button" data-popup="help-q2-2">مساعدة</button>
+      <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+      <div class="fb-src" hidden>
+        <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+        <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>نحسب معا:</p><p><strong>الخيار 2</strong> – نجمع أجزاء مساحة المحمية التي مسحتها الطائرة المسيّرة في اليوم الأول واليوم الثاني <span class="frac"><span>1</span><span>10</span></span> + <span class="frac"><span>2</span><span>5</span></span>.</p><p>نجمع الكسرين باستخدام المقام المشترك الأصغر 10: <span class="eq"><span class="frac"><span>2</span><span>5</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>4</span><span>10</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>5</span><span>10</span></span></span></p><p>يعني ذلك أنّه يتبقّى للمسح <span class="frac"><span>5</span><span>10</span></span> وهي <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</p></div>
+        <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>نحسب معا:</p><p><strong>الخيار 2</strong> – نجمع أجزاء مساحة المحمية التي مسحتها الطائرة المسيّرة في اليوم الأول واليوم الثاني <span class="frac"><span>1</span><span>10</span></span> + <span class="frac"><span>2</span><span>5</span></span>.</p><p>نجمع الكسرين باستخدام المقام المشترك الأصغر 10: <span class="eq"><span class="frac"><span>2</span><span>5</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>4</span><span>10</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>5</span><span>10</span></span></span></p><p>يعني ذلك أنّه يتبقّى للمسح <span class="frac"><span>5</span><span>10</span></span> وهي <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</p></div>
+      </div>
+    </div>
+
+    <div class="q-tr q-part" role="row" data-part="3">
+      <span role="rowheader">الخيار 3</span>
+      <span role="cell"><span class="frac"><span>1</span><span>4</span></span></span>
+      <span role="cell"><span class="frac"><span>1</span><span>6</span></span></span>
+      <span role="cell"><span class="q-input frac-input" data-answer="7/12" data-match="value"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></span>
+      <button class="help-btn" type="button" data-popup="help-q2-3">مساعدة</button>
+      <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+      <div class="fb-src" hidden>
+        <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+        <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>نحسب معا:</p><p><strong>الخيار 3</strong> – نجمع أجزاء مساحة المحمية التي مسحتها الطائرة المسيّرة في اليوم الأول واليوم الثاني <span class="frac"><span>1</span><span>6</span></span> + <span class="frac"><span>1</span><span>4</span></span>.</p><p>يلزم لجمع <span class="eq"><span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>6</span></span></span> إيجاد مقام مشترك، والمقام المشترك الأصغر هو <strong>12</strong>:</p><p><span class="eq"><span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>3</span><span>12</span></span> + <span class="frac"><span>2</span><span>12</span></span> = <span class="frac"><span>5</span><span>12</span></span></span></p><p>يعني ذلك أنّه ما زال يتبقّى للمسح <span class="frac"><span>7</span><span>12</span></span> من المساحة.</p></div>
+        <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>نحسب معا:</p><p><strong>الخيار 3</strong> – نجمع أجزاء مساحة المحمية التي مسحتها الطائرة المسيّرة في اليوم الأول واليوم الثاني <span class="frac"><span>1</span><span>6</span></span> + <span class="frac"><span>1</span><span>4</span></span>.</p><p>يلزم لجمع <span class="eq"><span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>6</span></span></span> إيجاد مقام مشترك، والمقام المشترك الأصغر هو <strong>12</strong>:</p><p><span class="eq"><span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>3</span><span>12</span></span> + <span class="frac"><span>2</span><span>12</span></span> = <span class="frac"><span>5</span><span>12</span></span></span></p><p>يعني ذلك أنّه ما زال يتبقّى للمسح <span class="frac"><span>7</span><span>12</span></span> من المساحة.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="popup-src" id="help-q2-1" hidden>
+    <p><strong>هيّا ننظر إلى خيار المسح الأول.</strong></p>
+    <p>هذه مساحة المحمية مقسّمة إلى أخماس.</p>
+    <!-- the two labels are live text, each under its own piece (the first piece is the leftmost). In the storyboard file they are white on white, so the slide render does not show them, but they are part of the help -->
+    <div class="help-fifths">
+      <img class="figure-frame" src="assets/images/q2-help1-fifths.png" alt="مساحة المحمية مقسّمة إلى خمسة أجزاء متساوية.">
+      <div class="hf-labels">
+        <svg class="hf-brace hf-b1" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg><svg class="hf-brace hf-b2" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1,19 Q1,11 13,11 H40 Q50,11 50,1 Q50,11 60,11 H87 Q99,11 99,19"/></svg>
+        <span class="hf-label hf-l1">الجزء الذي مُسح في اليوم الأول</span><span class="hf-label hf-l2">الجزء الذي مُسح في اليوم الثاني</span>
+      </div>
+    </div>
+  </div>
+  <div class="popup-src" id="help-q2-2" hidden>
+    <p><strong>هيّا ننظر إلى خيار المسح الثاني.</strong></p>
+    <p>مساحة المحمية مقسّمة إلى أعشار في الرسم العلوي.</p>
+    <p>المحمية نفسها مقسّمة إلى أخماس في الرسم السفلي.</p>
+    <p>كم عُشرا يوجد في كلّ <span class="frac"><span>1</span><span>5</span></span>؟</p>
+    <p><span class="eq"><span class="frac"><span>1</span><span>5</span></span> = <span class="frac"><span>?</span><span>10</span></span></span></p>
+    <img class="figure-frame" src="assets/images/q2-help2-tenths.png" alt="مساحة المحمية مقسّمة إلى عشرة أجزاء متساوية.">
+    <img class="figure-frame" src="assets/images/q2-help2-fifths.png" alt="مساحة المحمية مقسّمة إلى خمسة أجزاء متساوية.">
+  </div>
+  <div class="popup-src" id="help-q2-3" hidden>
+    <p>عبّروا عن أجزاء مساحات المحمية باستخدام مقام مشترك.</p>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 5 — שאלה 3.א — 25% ביום הראשון (שקפים 14-15) ================= -->
+<section class="screen" data-screen="5" data-sid="q3a" data-type="question" data-kind="single" data-weight="6.25" data-step="3" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q3a">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body">3. أ. أيّ خيار يكون فيه الجزء الذي مُسح <strong>في اليوم الأول</strong> <span class="ltr">25%</span> من مساحة المحمية؟</p>
+    <p class="q-instruction">انقروا على الخيار المناسب في الجدول.</p>
+  </div>
+  <img class="paper-card" src="assets/images/shared-paper-card.png" alt="">
+  <img class="paper-art paper-drone" src="assets/images/shared-paper-drone.png" alt="">
+  <img class="paper-art paper-compass" src="assets/images/shared-paper-compass.png" alt="">
+  <div class="q-table" role="radiogroup" aria-label="خيارات الإجابة">
+    <div class="q-tr q-th" aria-hidden="true"><span>جزء المساحة الذي سيُمسح</span><span>اليوم الأول</span><span>اليوم الثاني</span><span>اليوم الثالث</span></div>
+    <div class="q-tr q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span>الخيار 1</span><span><span class="frac"><span>1</span><span>5</span></span></span><span><span class="frac"><span>1</span><span>5</span></span></span><span><span class="frac"><span>3</span><span>5</span></span></span></div>
+    <div class="q-tr q-opt" data-id="2" role="radio" tabindex="0" aria-checked="false"><span>الخيار 2</span><span><span class="frac"><span>1</span><span>10</span></span></span><span><span class="frac"><span>2</span><span>5</span></span></span><span><span class="eq"><span class="frac"><span>5</span><span>10</span></span><span class="eq-ok"> = <span class="frac"><span>1</span><span>2</span></span></span></span></span></div>
+    <div class="q-tr q-opt" data-id="3" data-correct role="radio" tabindex="0" aria-checked="false"><span>الخيار 3</span><span><span class="frac"><span>1</span><span>4</span></span></span><span><span class="frac"><span>1</span><span>6</span></span></span><span><span class="frac"><span>7</span><span>12</span></span></span></div>
+  </div>
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q3a" hidden>
+    <p><span class="eq"><span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>?</span><span>100</span></span></span></p>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>تمّ في الخيار 3، في اليوم الأول، مسح <span class="ltr">25%</span> من مساحة المحمية.</p><p><span class="eq"><span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>25</span><span>100</span></span></span></p></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>تمّ في الخيار 3، في اليوم الأول، مسح <span class="ltr">25%</span> من مساحة المحمية.</p><p><span class="eq"><span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>25</span><span>100</span></span></span></p></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 6 — שאלה 3.ב — החלק הקטן ביותר ביום השלישי (שקפים 16-18) ================= -->
+<section class="screen" data-screen="6" data-sid="q3b" data-type="question" data-kind="single" data-weight="6.25" data-step="3" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q3b">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body"><strong>3. ب.</strong> يبدو، بحسب توقّعات الطقس، أنّ المطر سيهطل في اليوم الثالث من المسح. اقترحت مرام مسح أكبر مساحة ممكنة في اليومين الأولين، لكي تبقى للمسح في اليوم الثالث أصغر مساحة.</p>
+    <p class="q-body">أيّ خيار من الخيارات الثلاثة التي أمامكم يبقى فيه <strong>الجزء الأصغر</strong> للمسح <strong>في اليوم الثالث</strong>؟</p>
+    <p class="q-instruction">انقروا على الخيار المناسب في الجدول.</p>
+  </div>
+  <img class="figure-frame character" src="assets/images/q3b-may.png" alt="">
+  <img class="paper-card" src="assets/images/shared-paper-card.png" alt="">
+  <img class="paper-art paper-drone" src="assets/images/shared-paper-drone.png" alt="">
+  <img class="paper-art paper-compass" src="assets/images/shared-paper-compass.png" alt="">
+  <div class="q-table" role="radiogroup" aria-label="خيارات الإجابة">
+    <div class="q-tr q-th" aria-hidden="true"><span>جزء المساحة الذي سيُمسح</span><span>اليوم الأول</span><span>اليوم الثاني</span><span>اليوم الثالث</span></div>
+    <div class="q-tr q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span>الخيار 1</span><span><span class="frac"><span>1</span><span>5</span></span></span><span><span class="frac"><span>1</span><span>5</span></span></span><span><span class="frac"><span>3</span><span>5</span></span></span></div>
+    <div class="q-tr q-opt" data-id="2" data-correct role="radio" tabindex="0" aria-checked="false"><span>الخيار 2</span><span><span class="frac"><span>1</span><span>10</span></span></span><span><span class="frac"><span>2</span><span>5</span></span></span><span><span class="eq"><span class="frac"><span>5</span><span>10</span></span><span class="eq-ok"> = <span class="frac"><span>1</span><span>2</span></span></span></span></span></div>
+    <div class="q-tr q-opt" data-id="3" role="radio" tabindex="0" aria-checked="false"><span>الخيار 3</span><span><span class="frac"><span>1</span><span>4</span></span></span><span><span class="frac"><span>1</span><span>6</span></span></span><span><span class="frac"><span>7</span><span>12</span></span></span></div>
+  </div>
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-wide" id="help-q3b" hidden>
+    <p>حاولوا مقارنة كِبَر الأجزاء المتبقّية.</p>
+    <p>لوّنّا في الرسوم التي أمامكم أجزاء المحمية التي سيتمّ مسحها في اليوم الثالث في كلّ خيار.</p>
+    <p>أيّ منها تكون فيه المساحة المتبقّية للمسح في اليوم الثالث هي الأصغر؟</p>
+    <div class="help-options">
+      <div class="help-option"><img class="figure-frame" src="assets/images/q3b-help-a.png" alt="مساحة المحمية مقسّمة إلى خمسة أجزاء؛ ثلاثة منها ملوّنة."><p>الخيار أ <span class="frac"><span>3</span><span>5</span></span></p></div>
+      <div class="help-option"><img class="figure-frame" src="assets/images/q3b-help-b.png" alt="مساحة المحمية مقسّمة إلى عشرة أجزاء؛ خمسة منها ملوّنة."><p>الخيار ب <span class="frac"><span>5</span><span>10</span></span></p></div>
+      <div class="help-option"><img class="figure-frame" src="assets/images/q3b-help-c.png" alt="مساحة المحمية مقسّمة إلى اثني عشر جزءا؛ سبعة منها ملوّنة."><p>الخيار ت <span class="frac"><span>7</span><span>12</span></span></p></div>
+    </div>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>نرى من الجدول أنّه في الخيار 1 يتبقّى للمسح في اليوم الثالث <span class="frac"><span>3</span><span>5</span></span> من المساحة، وفي الخيار 3 يتبقّى للمسح <span class="frac"><span>7</span><span>12</span></span> من المساحة.</p><p>تبقّت في هذين الخيارين مساحة أكبر من <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</p><p>يتبقّى للمسح في الخيار 2 بالضبط <span class="frac"><span>1</span><span>2</span></span> من المساحة، وهي أصغر مساحة تبقّت للمسح، ولذلك الخيار 2 هو المناسب.</p></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>نرى من الجدول أنّه في الخيار 1 يتبقّى للمسح في اليوم الثالث <span class="frac"><span>3</span><span>5</span></span> من المساحة، وفي الخيار 3 يتبقّى للمسح <span class="frac"><span>7</span><span>12</span></span> من المساحة.</p><p>تبقّت في هذين الخيارين مساحة أكبر من <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</p><p>يتبقّى للمسح في الخيار 2 بالضبط <span class="frac"><span>1</span><span>2</span></span> من المساحة، وهي أصغر مساحة تبقّت للمسح، ولذلك الخيار 2 هو المناسب.</p></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 7 — סרטון מעבר — תנאים חדשים (שקף 19) ================= -->
+<section class="screen" data-screen="7" data-sid="video-conditions" data-type="video" tabindex="-1">
+  <div class="video-wrap">
+    <video class="video-el" playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noremoteplayback nofullscreen noplaybackrate" data-poster="assets/images/video-conditions-poster.jpg"><source src="assets/videos/RAHFAN_RESHET_CLIP2_V2.mp4#t=0.001" type="video/mp4"></video>
+    <div class="vcap-src" data-clear-after="27.54" hidden>
+        <span data-t="0.18" data-end="2.3">وصلنا تحديث من غرفة التحكّم</span>
+        <span data-t="2.3" data-end="3.9">تغيّر الطقس</span>
+        <span data-t="3.9" data-end="5.72">إذًا، لا حاجة إلى مسح الجزء</span>
+        <span data-t="5.72" data-end="7.58">الأكبر في اليومين الأولين</span>
+        <span data-t="7.58" data-end="10.44">هناك، مع ذلك، شروط جديدة للمهمّة</span>
+        <span data-t="10.44" data-end="14.08">يجب أن تكون المساحة التي ستُمسح في اليوم الثاني أكبر</span>
+        <span data-t="14.08" data-end="17.12">بمرّتين من الجزء الذي سيُمسح في اليوم الأول</span>
+        <span data-t="17.12" data-end="20.46">ويبقى للمسح في اليوم الثالث مساحة أصغر</span>
+        <span data-t="20.46" data-end="22.24">من نصف مساحة المحمية</span>
+        <span data-t="22.24" data-end="25.38">حسنا، نحتاج إذن إلى التفكير في خيار</span>
+        <span data-t="25.38" data-end="27.54">آخر يلبّي هذه الشروط</span>
+      </div>
+    <div class="video-caption hidden"><p></p></div>
+    <button class="play-btn-big" type="button" aria-label="تشغيل الفيديو"></button>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 8 — שאלה 4 — תוכנית סריקה חדשה (שקפים 20-21) ================= -->
+<section class="screen" data-screen="8" data-sid="q4" data-type="question" data-kind="input" data-grade="hook" data-feedback-close data-weight="12.5" data-step="4" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q4">مساعدة</button>
+  <button class="applet-btn blink" type="button" data-popup="applet-q4">التطبيق</button>
+  <div class="q-card">
+    <p class="q-body"><strong>4. أعدّوا خطّة مسح جديدة تلائم الشروط الجديدة. استعينوا بالتطبيق الموجود في الأعلى، واكتبوا أيّ جزء من مساحة المحمية سيُمسح في كلّ يوم من الأيام:</strong></p>
+  </div>
+  <div class="conditions-card">
+    <img class="cond-art" src="assets/images/shared-conditions-card.png" alt="">
+    <h3 class="sr-only">شروط المهمّة الجديدة</h3>
+    <ul>
+      <li>ستكون المساحة التي ستُمسح في اليوم الثاني أكبر بمرّتين من المساحة التي مُسحت في اليوم الأول.</li>
+      <li>ستكون المساحة التي ستتبقّى للمسح في اليوم الثالث أصغر من <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</li>
+    </ul>
+    <p class="cond-reminder">تذكّروا: يجب أن يتمّ المسح في <strong class="cond-em">ثلاثة أيام</strong>.</p>
+  </div>
+  <div class="q-fields">
+    <div class="q-field"><span class="q-field-label" id="q4-d1">اليوم الأول:</span><span class="q-input frac-input" data-name="d1" aria-labelledby="q4-d1"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></div>
+    <div class="q-field"><span class="q-field-label" id="q4-d2">اليوم الثاني:</span><span class="q-input frac-input" data-name="d2" aria-labelledby="q4-d2"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></div>
+    <div class="q-field"><span class="q-field-label" id="q4-d3">اليوم الثالث:</span><span class="q-input frac-input" data-name="d3" aria-labelledby="q4-d3"><input class="q-in" data-frac="num" inputmode="numeric" aria-label="بسط"><input class="q-in" data-frac="den" inputmode="numeric" aria-label="مقام"></span></div>
+  </div>
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q4" hidden>
+    <p>مثال: إذا كانت الطائرة المسيّرة تمسح في اليوم الأول <span class="frac"><span>1</span><span>4</span></span> من مساحة المحمية، فماذا سيحدث في اليوم الثاني والثالث؟</p>
+  </div>
+  <div class="popup-src popup-wide" id="applet-q4" hidden>
+    <div class="applet-frame"><iframe src="assets/app/scan-split.html" title="تقسيم مساحة المسح" scrolling="no"></iframe></div>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>يمكن العمل بحسب الترتيب التالي لبناء خطّة تلائم الشروط:</p><ol><li>نختار الجزء الذي سيُمسح في اليوم الأول.</li><li>نضرب هذا الجزء في 2 فنحصل على الجزء الذي سيُمسح في اليوم الثاني.</li><li>نجمع الجزأين، ونطرحهما من الواحد الصحيح (مساحة المحمية كلّها) – وهكذا نحصل على المساحة التي تبقّت في اليوم الثالث.</li><li>نتحقّق من أنّ المساحة المتبقّية للمسح في اليوم الثالث أصغر من <span class="frac"><span>1</span><span>2</span></span></li><li>نتحقّق من أنّ مجموع الأجزاء كلّها يساوي الواحد الصحيح.</li></ol><p>أمامكم خياران كمثال:</p><table class="fb-table"><tr><th></th><th>اليوم الأول</th><th>اليوم الثاني</th><th>اليوم الثالث</th></tr><tr><th>الخيار 1</th><td><span class="frac"><span>3</span><span>10</span></span></td><td><span class="frac"><span>6</span><span>10</span></span></td><td><span class="frac"><span>1</span><span>10</span></span></td></tr><tr><th>الخيار 2</th><td><span class="frac"><span>1</span><span>5</span></span></td><td><span class="frac"><span>2</span><span>5</span></span></td><td><span class="frac"><span>2</span><span>5</span></span></td></tr></table></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>يمكن العمل بحسب الترتيب التالي لبناء خطّة تلائم الشروط:</p><ol><li>نختار الجزء الذي سيُمسح في اليوم الأول.</li><li>نضرب هذا الجزء في 2 فنحصل على الجزء الذي سيُمسح في اليوم الثاني.</li><li>نجمع الجزأين، ونطرحهما من الواحد الصحيح (مساحة المحمية كلّها) – وهكذا نحصل على المساحة التي تبقّت في اليوم الثالث.</li><li>نتحقّق من أنّ المساحة المتبقّية للمسح في اليوم الثالث أصغر من <span class="frac"><span>1</span><span>2</span></span></li><li>نتحقّق من أنّ مجموع الأجزاء كلّها يساوي الواحد الصحيح.</li></ol><p>أمامكم خياران كمثال:</p><table class="fb-table"><tr><th></th><th>اليوم الأول</th><th>اليوم الثاني</th><th>اليوم الثالث</th></tr><tr><th>الخيار 1</th><td><span class="frac"><span>3</span><span>10</span></span></td><td><span class="frac"><span>6</span><span>10</span></span></td><td><span class="frac"><span>1</span><span>10</span></span></td></tr><tr><th>الخيار 2</th><td><span class="frac"><span>1</span><span>5</span></span></td><td><span class="frac"><span>2</span><span>5</span></span></td><td><span class="frac"><span>2</span><span>5</span></span></td></tr></table></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 9 — שאלה 5 — האם ההצעה עומדת בתנאים (שקפים 22-24) ================= -->
+<section class="screen" data-screen="9" data-sid="q5" data-type="question" data-require-video data-kind="single" data-attempts="1" data-weight="12.5" data-step="5" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q5">مساعدة</button>
+  <button class="applet-btn blink" type="button" data-popup="applet-q5">التطبيق</button>
+  <div class="q-card">
+    <p class="q-body"><strong>5. اقترح أحد أعضاء الطاقم أن يُمسح في اليوم الأول <span class="frac"><span>2</span><span>5</span></span> من مساحة المحمية.</strong></p>
+    <p class="q-body"><strong>هل يلبّي هذا الاقتراح شروط المهمّة؟</strong></p>
+    <div class="q-answers" role="radiogroup" aria-label="خيارات الإجابة">
+      <div class="q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>نعم</div>
+      <div class="q-opt" data-id="2" data-correct role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>لا</div>
+    </div>
+    <label class="q-free-label" for="q5-why">اشرحوا السبب:</label>
+    <textarea class="q-free" id="q5-why" data-min-chars="3"></textarea>
+    <!-- shown after an option is picked while the explanation is still too short -->
+    <div class="q-free-hint" role="status" hidden>
+      <svg class="hint-hand" viewBox="0 0 64 76" aria-hidden="true" focusable="false">
+        <path d="M24 38V9a6 6 0 0 1 12 0v26" />
+        <path d="M36 35c0-5 11-5 11 0 4-3 10 1 8 6 5 0 6 6 4 10-2 8-6 19-8 21H27c-4-4-12-14-14-18-2-4 1-8 5-7 3 1 6 4 6 4z" />
+        <path d="M36 44v8M47 41v10M55 46v8" class="hint-crease" />
+      </svg>
+      <span class="hint-text">لا تنسوا شرح السبب</span>
+    </div>
+  </div>
+  <div class="conditions-card">
+    <img class="cond-art" src="assets/images/shared-conditions-card.png" alt="">
+    <h3 class="sr-only">شروط المهمّة الجديدة</h3>
+    <ul>
+      <li>ستكون المساحة التي ستُمسح في اليوم الثاني أكبر بمرّتين من المساحة التي مُسحت في اليوم الأول.</li>
+      <li>ستكون المساحة التي ستتبقّى للمسح في اليوم الثالث أصغر من <span class="frac"><span>1</span><span>2</span></span> من مساحة المحمية.</li>
+    </ul>
+    <p class="cond-reminder">تذكّروا: يجب أن يتمّ المسح في <strong class="cond-em">ثلاثة أيام</strong>.</p>
+  </div>
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q5" hidden>
+    <p>ما الجزء من المحمية الذي سيُمسح في اليومين الأول والثاني معا بحسب الاقتراح؟</p>
+  </div>
+  <div class="popup-src popup-wide" id="applet-q5" hidden>
+    <div class="applet-frame"><iframe src="assets/app/scan-split.html" title="تقسيم مساحة المسح" scrolling="no"></iframe></div>
+  </div>
+  <div class="popup-src popup-wide" id="video-q5" hidden>
+    <div class="video-wrap">
+      <video class="video-el" playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noremoteplayback nofullscreen noplaybackrate" data-poster="assets/images/q5-video-poster.jpg"><source src="assets/videos/RAHFAN_RESHET_CLIP3_V2.mp4#t=0.001" type="video/mp4"></video>
+      <div class="vcap-src" data-clear-after="14.92" hidden>
+        <span data-t="0" data-end="1.72">يجب بحسب شروط المهمّة</span>
+        <span data-t="1.72" data-end="3.46">أن نمسح في اليوم الثاني</span>
+        <span data-t="3.46" data-end="7.4">جزءا أكبر بمرّتين من الجزء الذي مُسح في اليوم الأول</span>
+        <span data-t="7.4" data-end="9.38">جمع المساحتين معا</span>
+        <span data-t="9.38" data-end="11.42">يعطي مساحة أكبر من الواحد الصحيح</span>
+        <span data-t="11.42" data-end="14.92">ولذلك لا يلبّي هذا الخيار شروط المهمّة</span>
+      </div>
+      <div class="video-caption hidden"><p></p></div>
+      <button class="play-btn-big" type="button" aria-label="تشغيل الفيديو"></button>
+    </div>
+  </div>
+  <div class="fb-src" hidden>
+    <!-- one try only (data-attempts="1"): this message is never shown; qa_check.py asks every question for one -->
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">هذا الاقتراح لا يلبّي شروط المهمّة</p><p>انقروا على الفيديو.</p><button class="fb-video-btn" type="button" data-popup="video-q5" aria-label="تشغيل الفيديو"></button></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا الاقتراح لا يلبّي شروط المهمّة</p><p>انقروا على الفيديو.</p><button class="fb-video-btn" type="button" data-popup="video-q5" aria-label="تشغيل الفيديو"></button></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 10 — שאלה 6 — השטח שנסרק ביום השני (שקפים 25-26) ================= -->
+<section class="screen" data-screen="10" data-sid="q6" data-type="question" data-kind="single" data-weight="12.5" data-step="6" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q6">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body"><strong>6. اختار أعضاء الطاقم الاقتراح التالي:</strong></p>
+    <div class="plan-card">
+        <table class="plan-table">
+        <tr><th>جزء المساحة الذي سيُمسح</th><th>اليوم الأول</th><th>اليوم الثاني</th><th>اليوم الثالث</th></tr>
+        <tr><th>اقتراح للأجزاء التي ستُمسح</th><td><span class="frac"><span>3</span><span>10</span></span></td><td><span class="frac"><span>3</span><span>5</span></span></td><td><span class="frac"><span>1</span><span>10</span></span></td></tr>
+      </table>
+      <img class="plan-art plan-notepad" src="assets/images/q6-notepad.png" alt="">
+      <img class="plan-art plan-binoculars" src="assets/images/q6-binoculars.png" alt="">
+    </div>
+  </div>
+  <div class="q6-ask">
+    <p class="q-body">معلوم أنّ مساحة المحمية 60 كيلومترا مربّعا.</p>
+    <p class="q-body"><strong>احسبوا المساحة التي مُسحت في اليوم الثاني</strong></p>
+    <p class="q-instruction">اختاروا الإجابة الصحيحة:</p>
+    <div class="q-answers" role="radiogroup" aria-label="خيارات الإجابة">
+      <div class="q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>26 كيلومترا مربّعا</div>
+      <div class="q-opt" data-id="2" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>24 كيلومترا مربّعا</div>
+      <div class="q-opt" data-id="3" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>30 كيلومترا مربّعا</div>
+      <div class="q-opt" data-id="4" data-correct role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>36 كيلومترا مربّعا</div>
+    </div>
+  </div>
+  <img class="figure-frame characters" src="assets/images/q6-kids.png" alt="">
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q6" hidden>
+    <p>ابدؤوا بقسمة مساحة المحمية على 5 لتحسبوا عدد الكيلومترات المربّعة في <span class="frac"><span>2</span><span>5</span></span> من 60 كيلومترا مربّعا.</p>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>مساحة المحمية كلّها 60 كيلومترا مربّعا، وقد تمّ مسح <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية في اليوم الثاني. نقسّم مساحة المحمية إلى 5 أجزاء متساوية.</p><p>12 = 5 : 60</p><p>يعني ذلك أنّ كلّ <span class="frac"><span>1</span><span>5</span></span> من مساحة المحمية تساوي 12 كيلومترا مربّعا.</p><p>ينتج عن ذلك أنّ <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية تساوي 36 كيلومترا مربّعا.</p><div class="km-figure"><img class="figure-frame fb-figure" src="assets/images/q6-fb-map.png" alt="مساحة المحمية في خمسة أجزاء؛ ثلاثة أجزاء معلّمة."><span class="km k1">12 كيلومترا مربّعا</span><span class="km k2">12 كيلومترا مربّعا</span><span class="km k3">12 كيلومترا مربّعا</span></div></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>مساحة المحمية كلّها 60 كيلومترا مربّعا، وقد تمّ مسح <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية في اليوم الثاني. نقسّم مساحة المحمية إلى 5 أجزاء متساوية.</p><p>12 = 5 : 60</p><p>يعني ذلك أنّ كلّ <span class="frac"><span>1</span><span>5</span></span> من مساحة المحمية تساوي 12 كيلومترا مربّعا.</p><p>ينتج عن ذلك أنّ <span class="frac"><span>3</span><span>5</span></span> من مساحة المحمية تساوي 36 كيلومترا مربّعا.</p><div class="km-figure"><img class="figure-frame fb-figure" src="assets/images/q6-fb-map.png" alt="مساحة المحمية في خمسة أجزاء؛ ثلاثة أجزاء معلّمة."><span class="km k1">12 كيلومترا مربّعا</span><span class="km k2">12 كيلومترا مربّعا</span><span class="km k3">12 كيلومترا مربّعا</span></div></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 11 — סרטון — הסריקה הסתיימה (שקפים 27-28) ================= -->
+<section class="screen" data-screen="11" data-sid="video-results" data-type="video" tabindex="-1">
+  <div class="video-wrap">
+    <video class="video-el" playsinline preload="metadata" disablepictureinpicture controlslist="nodownload noremoteplayback nofullscreen noplaybackrate" data-preview-at="0.13" data-poster="assets/images/video-results-poster.jpg"><source src="assets/videos/RAHFAN_RESHET_CLIP4_V3.mp4#t=0.001" type="video/mp4"></video>
+    <div class="vcap-src" data-clear-after="37.28" hidden>
+        <span data-t="0" data-end="1.62">نجحت خطّتنا!</span>
+        <span data-t="1.62" data-end="3.26">أنهت الطائرة المسيّرة المسح</span>
+        <span data-t="3.26" data-end="5.44">وجمعت معلومات كثيرة جدا عن المحمية</span>
+        <span data-t="5.44" data-end="8.9">هيّا نعرض المعلومات التي جُمعت بواسطة مخطّط دائري</span>
+        <span data-t="8.9" data-end="11.8">مذهل! عالج الطاقم البيانات</span>
+        <span data-t="11.8" data-end="15.88">ويمكننا أن نرى كيف انقسمت مساحة المحمية بحسب أنواع المناطق</span>
+        <span data-t="15.88" data-end="19.25">1/2 من مساحة المحمية أحراش ونباتات</span>
+        <span data-t="19.25" data-end="22.4">1/4 من مساحة المحمية هي مصادر المياه</span>
+        <span data-t="22.4" data-end="26.34">و1/5 من المساحة مسارات الوصول لطواقم العمل بالمحمية</span>
+        <span data-t="26.34" data-end="30.78">و1/10 من المساحة هي منطقة إطلالة للزوّار والزائرات</span>
+        <span data-t="30.78" data-end="33.77">لحظة، يبدو لي أنّ هناك خطأ في البيانات!</span>
+        <span data-t="33.77" data-end="35.11">حقّا؟</span>
+        <span data-t="35.11" data-end="37.28">هيّا نفحص ذلك معا</span>
+      </div>
+    <div class="video-caption hidden"><p></p></div>
+    <button class="play-btn-big" type="button" aria-label="تشغيل الفيديو"></button>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 12 — שאלה 7 — הטעות בדיאגרמה (שקפים 29-30) ================= -->
+<section class="screen" data-screen="12" data-sid="q7" data-type="question" data-kind="single" data-weight="12.5" data-step="7" tabindex="-1">
+  <img class="screen-bg" src="assets/images/q7-bg.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q7">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body"><strong>7. أمامكم المخطّط الذي يعرض تقسيم مساحة المحمية</strong> بحسب المناطق.</p>
+    <p class="q-body"><strong>ما الخطأ الذي اكتشفته مرام؟</strong></p>
+    <p class="q-instruction">اختاروا الادّعاء الصحيح:</p>
+    <div class="q-answers" role="radiogroup" aria-label="خيارات الإجابة">
+      <div class="q-opt" data-id="1" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>مجموع جميع الكسور المعروضة في المخطّط يساوي 1</div>
+      <div class="q-opt" data-id="2" role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>مجموع جميع الكسور المعروضة أصغر من 1</div>
+      <div class="q-opt" data-id="3" data-correct role="radio" tabindex="0" aria-checked="false"><span class="q-mark"></span>مجموع جميع الكسور المعروضة أكبر من 1</div>
+    </div>
+  </div>
+  <img class="figure-frame q7-image" src="assets/images/q7-img.png" alt="تقرير تحليل مساحة المحمية: أحراش ونباتات 1/2؛ مصادر المياه 1/4؛ مسارات الوصول لطواقم العمل بالمحمية 1/5؛ منطقة إطلالة للزوّار والزائرات 1/10.">
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q7" hidden>
+    <p>احسبوا مجموع الأجزاء</p>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>نجد المقام المشترك لجميع الكسور ونجمعها لحساب مجموع الكسور المعروضة في المخطّط:</p><p><span class="eq"><span class="frac"><span>1</span><span>2</span></span> + <span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>5</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>10</span><span>20</span></span> + <span class="frac"><span>5</span><span>20</span></span> + <span class="frac"><span>4</span><span>20</span></span> + <span class="frac"><span>2</span><span>20</span></span> = <span class="frac"><span>21</span><span>20</span></span> = 1 <span class="frac"><span>1</span><span>20</span></span></span></p><p>نحصل على أنّ مجموع الأجزاء هو: <span class="eq"><span class="frac"><span>21</span><span>20</span></span> = 1 <span class="frac"><span>1</span><span>20</span></span></span></p></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>نجد المقام المشترك لجميع الكسور ونجمعها لحساب مجموع الكسور المعروضة في المخطّط:</p><p><span class="eq"><span class="frac"><span>1</span><span>2</span></span> + <span class="frac"><span>1</span><span>4</span></span> + <span class="frac"><span>1</span><span>5</span></span> + <span class="frac"><span>1</span><span>10</span></span> = <span class="frac"><span>10</span><span>20</span></span> + <span class="frac"><span>5</span><span>20</span></span> + <span class="frac"><span>4</span><span>20</span></span> + <span class="frac"><span>2</span><span>20</span></span> = <span class="frac"><span>21</span><span>20</span></span> = 1 <span class="frac"><span>1</span><span>20</span></span></span></p><p>نحصل على أنّ مجموع الأجزاء هو: <span class="eq"><span class="frac"><span>21</span><span>20</span></span> = 1 <span class="frac"><span>1</span><span>20</span></span></span></p></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 13 — הדיאגרמה הנכונה (שקף 31) ================= -->
+<section class="screen" data-screen="13" data-sid="diagram-fixed" data-type="explain" tabindex="-1">
+  <img class="screen-bg" src="assets/images/diagram-fixed-bg-new.png" alt="">
+  <div class="banner diagram-banner"><p>تبيّن من فحص أُجري أنّه كان هناك خطأ في حساب جزء مسارات الوصول لطواقم العمل بالمحمية. <strong>هذا هو المخطّط الصحيح:</strong></p></div>
+  <div class="dash">
+    <p class="dash-title">تقرير تحليل مساحة المحمية</p>
+    <img class="dash-pie" src="assets/images/diagram-fixed-pie.png" alt="مخطّط دائري: نصف، وربع، وثلاثة أجزاء من عشرين، وعُشر.">
+    <ul class="diagram-legend">
+      <li class="lg-1"><span class="lg-name">أحراش ونباتات</span><span class="frac"><span>1</span><span>2</span></span></li>
+      <li class="lg-2"><span class="lg-name">مصادر المياه</span><span class="frac"><span>1</span><span>4</span></span></li>
+      <li class="lg-3"><span class="lg-name">مسارات الوصول لطواقم العمل بالمحمية</span><span class="frac"><span>3</span><span>20</span></span></li>
+      <li class="lg-4"><span class="lg-name">منطقة إطلالة للزوّار والزائرات</span><span class="frac"><span>1</span><span>10</span></span></li>
+    </ul>
+  </div>
+  <img class="kid kid-roy" src="assets/images/diagram-fixed-roy.png" alt="">
+  <img class="kid kid-may" src="assets/images/diagram-fixed-may.png" alt="">
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 14 — שאלה 8 — כמה צבאים בשמורה (שקפים 32-33) ================= -->
+<section class="screen" data-screen="14" data-sid="q8" data-type="question" data-kind="input" data-weight="12.5" data-step="8" tabindex="-1">
+  <img class="screen-bg" src="assets/images/bg-question.jpg" alt="">
+  <button class="help-btn" type="button" data-popup="help-q8">مساعدة</button>
+  <div class="q-card">
+    <p class="q-body"><strong>8. بدأ الجزء الثاني من مهمّة المسح: عدّ الحيوانات.</strong></p>
+    <p class="q-body">تبيّن من تحليل بيانات الطائرة المسيّرة أنّه يعيش في كلّ 4 كيلومترات مربّعة في المعدّل 2 من الغزلان.</p>
+    <p class="q-body"><strong>مساحة المحمية 60 كيلومترا مربّعا.</strong></p>
+    <p class="q-body"><strong>كم غزالا يوجد في المحمية كلّها؟</strong></p>
+    <p class="q-instruction">اكتبوا الإجابة.</p>
+    <span class="q-input" data-answer="30" data-match="value"><input class="q-in" inputmode="numeric" aria-label="عدد الغزلان"></span>
+  </div>
+  <img class="figure-frame photo" src="assets/images/q8-deer.png" alt="غزالان في المحمية.">
+  <button class="btn-check" type="button" disabled>هل إجابتي صحيحة؟</button>
+  <div class="popup-src popup-by-btn" id="help-q8" hidden>
+    <p>يوجد في كلّ 4 كيلومترات مربّعة في المعدّل 2 من الغزلان،</p>
+    <p>يوجد في 12 كيلومترا مربّعا في المعدّل 6 من الغزلان.</p>
+  </div>
+  <div class="fb-src" hidden>
+    <div data-fb="retry"><p class="fb-t">هذه ليست الإجابة، حاولوا مرّة أخرى.</p><p>يمكنكم النقر على زرّ المساعدة للحصول على تلميح.</p></div>
+    <div data-fb="correct"><p class="fb-t">إجابتك صحيحة!</p><p>معلوم لدينا أنّ مساحة المحمية 60 كيلومترا مربّعا. نقسّم مساحة المحمية إلى وحدات مساحة، مساحة كلّ منها 4 كيلومترات مربّعة: 15 = 4 : 60 .</p><p>نحصل على 15 وحدة مساحة في المحمية، مساحة كلّ منها 4 كيلومترات مربّعة.</p><p>نضرب عدد الغزلان في عدد وحدات المساحة لأنّه يوجد في كلّ 4 كيلومترات مربّعة في المعدّل 2 من الغزلان: 30 = 2 × 15 .</p><p>يوجد في المحمية 30 غزالا.</p></div>
+    <div data-fb="wrong2"><p class="fb-t">هذا خطأ<span class="fb-rest"> – تعالوا نتعلّم من هذا</span></p><p>معلوم لدينا أنّ مساحة المحمية 60 كيلومترا مربّعا. نقسّم مساحة المحمية إلى وحدات مساحة، مساحة كلّ منها 4 كيلومترات مربّعة: 15 = 4 : 60 .</p><p>نحصل على 15 وحدة مساحة في المحمية، مساحة كلّ منها 4 كيلومترات مربّعة.</p><p>نضرب عدد الغزلان في عدد وحدات المساحة لأنّه يوجد في كلّ 4 كيلومترات مربّعة في المعدّل 2 من الغزلان: 30 = 2 × 15 .</p><p>يوجد في المحمية 30 غزالا.</p></div>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+  <button class="nav-btn nav-next hidden" type="button" aria-label="التالي"></button>
+</section>
+
+<!-- ================= SCREEN 15 — המשימה הושלמה (שקף 34) ================= -->
+<section class="screen" data-screen="15" data-sid="finish" data-type="finish" tabindex="-1">
+  <img class="screen-bg" src="assets/images/finish-bg.jpg" alt="">
+  <p class="finish-sign">اكتملت المهمّة!</p>
+  <div class="finish-text">
+    <p><strong>نجحتم في إكمال مهمّة رسم خريطة محمية اللوز الطبيعيّة!</strong></p>
+    <p><strong>حصل طاقم علماء البيئة، بفضل عملكم، على صورة كاملة للمحمية، ليتمكّن من اتّخاذ قرارات تساعد على الحفاظ على المحمية والبحث عن حلّ لمشكلة جفاف مصادر المياه.</strong></p>
+  </div>
+  <button class="btn-primary finish-btn" type="button" data-popup="finish-popup">انتهيت</button>
+  <!-- the popup's X sends the grade and closes the task (open question 11) -->
+  <div class="popup-src" id="finish-popup" data-close-action="finish" hidden>
+    <p>هذا كلّ شيء، انتهت المهمّة.</p>
+    <p>علامتك هي <span class="final-grade" data-final-grade></span></p>
+    <p> يجب إغلاق المهمّة بالنقر على X.</p>
+  </div>
+  <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
+</section>
+
+<!-- The end of the lomda (script.js: showReturnScreen). The finish popup above (the storyboard's own wording) sends the grade
+     when it opens; its X, Escape or the backdrop shows this dark screen, which sends the learner back to the Moodle.
+     The wording is the approved house text; "העמוד הבא" has to be the label of the Moodle quiz's next-page button. -->
+<div id="final-return" role="dialog" aria-modal="true" aria-labelledby="final-return-text" tabindex="-1" hidden>
+  <p id="final-return-text">الآن، عودوا إلى النموذج،<br>اضغطوا على زرّ "الصفحة التالية"<br>وأجيبوا عن الأسئلة.</p>
+</div>
+
+<!-- ================= Global elements (outside every screen) ================= -->
+<div id="q-stepper" class="q-stepper" aria-hidden="true"></div>
+
+<div id="feedback-popup" role="alertdialog" aria-labelledby="fb-title" tabindex="-1">
+  <button class="fb-close" type="button" aria-label="إغلاق"></button>
+  <div class="fb-title-row"><span class="fb-icon" aria-hidden="true"></span><div class="fb-title" id="fb-title"></div></div>
+  <div class="fb-body" id="fb-body"></div>
+</div>
+
+<div id="img-zoom-modal" role="dialog" aria-modal="true" aria-label="عرض مكبّر" tabindex="-1">
+  <div class="img-zoom-panel">
+    <button class="img-zoom-close" type="button" data-zoom-close aria-label="إغلاق">✕</button>
+    <div id="img-zoom-body"></div>
+  </div>
+</div>
+
+<div id="reopen-popup" role="dialog" aria-modal="true" aria-label="إعادة العرض" tabindex="-1">
+  <div id="reopen-popup-body"></div>
+</div>
+
+<div id="a11y-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Engine strings for screen readers — kept here so they are translated with everything else. -->
+<div id="ui-text" hidden>
+  <span data-key="dnd-picked">تم الاختيار. اختاروا مكانا فارغا واضغطوا Enter.</span>
+  <span data-key="dnd-placed">وضع في المكان.</span>
+  <span data-key="close">إغلاق</span>
+  <span data-key="narration-play">تشغيل السرد الصوتي</span>
+  <span data-key="narration-pause">إيقاف السرد الصوتي مؤقتا</span>
+  <span data-key="narration-resume">متابعة السرد الصوتي</span>
+  <span data-key="narration-replay">إعادة تشغيل السرد الصوتي</span>
+  <span data-key="narration-unavailable">السرد الصوتي غير متاح</span>
+</div>
+
+<!-- Video control bar, copied into every .video-wrap by script.js -->
+<template id="vctrls-tpl">
+  <div class="vctrls" dir="ltr">
+    <button class="vc-btn" type="button" data-play aria-label="تشغيل أو إيقاف مؤقت">▶</button>
+    <span class="vc-time" data-cur>0:00</span>
+    <input class="vc-seek" type="range" min="0" max="1000" value="0" step="1" data-seek aria-label="شريط التقدّم">
+    <span class="vc-time" data-dur>0:00</span>
+    <button class="vc-btn vc-cc" type="button" data-cc aria-pressed="true" aria-label="الترجمة النصّية">CC</button>
+    <button class="vc-btn" type="button" data-mute aria-pressed="false" aria-label="كتم الصوت">🔊</button>
+    <input class="vc-vol" type="range" min="0" max="100" value="100" step="1" data-vol aria-label="مستوى الصوت">
+    <button class="vc-btn" type="button" data-full aria-pressed="false" aria-label="شاشة كاملة">⛶</button>
+  </div>
+</template>
+
+</div><!-- /#app -->
+<script src="script.js"></script>
+</body>
+</html>
