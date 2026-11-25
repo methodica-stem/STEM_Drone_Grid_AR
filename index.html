@@ -567,11 +567,14 @@
   <button class="nav-btn nav-prev" type="button" aria-label="العودة"></button>
 </section>
 
-<!-- The end of the lomda (script.js: showReturnScreen). The finish popup above (the storyboard's own wording) sends the grade
-     when it opens; its X, Escape or the backdrop shows this dark screen, which sends the learner back to the Moodle.
-     The wording is the approved house text; "העמוד הבא" has to be the label of the Moodle quiz's next-page button. -->
+<!-- The end of the lomda (script.js: showReturnScreen). The finish popup above (the storyboard's own wording) sends the grade when it opens; its X, Escape or the backdrop shows this black screen: close the lomda and go back to the Moodle questions.
+     The wording and the logo (assets/images/moodle-logo-white.svg) are the approved ending (Hebrew and Arabic). -->
 <div id="final-return" role="dialog" aria-modal="true" aria-labelledby="final-return-text" tabindex="-1" hidden>
-  <p id="final-return-text">الآن، عودوا إلى النموذج،<br>اضغطوا على زرّ "الصفحة التالية"<br>وأجيبوا عن الأسئلة.</p>
+  <div class="return-stage">
+    <p id="final-return-text" class="return-text">الآن أغلقوا الوحدة التعليمية<br>وعودوا للإجابة عن أسئلة المساق في<img class="return-moodle-logo" src="assets/images/moodle-logo-white.svg" alt="Moodle"></p>
+    <button class="return-close" type="button">إغلاق الوحدة التعليمية</button>
+    <p class="return-hint" hidden>يمكنكم إغلاق هذه النافذة.</p>
+  </div>
 </div>
 
 <!-- ================= Global elements (outside every screen) ================= -->

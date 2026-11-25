@@ -1259,7 +1259,7 @@ function sendComplete() {
    Moodle (the quiz page that follows the lomda). Both are in index.html (#final-score,
    #final-return) so their text is translated with everything else.
      "סיימתי" (data-action="finish")  ->  finishLomda(): sends the grade, shows the score pop-up
-     the pop-up's X (or Escape)      ->  showReturnScreen(): the dark screen with the instruction
+     the pop-up's X (or Escape)      ->  showReturnScreen(): the black screen, logo + close button (closeLomdaWindow)
    After the pop-up nothing else works: no arrows, no Tab out. The learner leaves through the Moodle.
    A lomda that skins its own finish popup (.popup-src with data-close-action="finish") gets the
    same ending: opening it sends the grade, its X shows the dark screen.
@@ -1296,10 +1296,21 @@ function showReturnScreen() {
   const box = document.getElementById('final-score');
   if (box) box.hidden = true;
   ret.hidden = false;
-  ret.focus({ preventScroll: true });
+  const cb = ret.querySelector('.return-close');
+  (cb || ret).focus({ preventScroll: true });
+}
+function closeLomdaWindow() {
+  try { window.close(); } catch (e) {}
+  try { if (window.top !== window) window.top.close(); } catch (e) {}
+  setTimeout(function () {
+    const hint = document.querySelector('#final-return .return-hint');
+    if (hint) hint.hidden = false;
+  }, 400);
 }
 document.addEventListener('click', function (e) {
-  if (e.target.closest && e.target.closest('#final-score .final-score-close')) showReturnScreen();
+  if (!e.target.closest) return;
+  if (e.target.closest('#final-score .final-score-close')) showReturnScreen();
+  else if (e.target.closest('#final-return .return-close')) closeLomdaWindow();
 });
 /* Capture phase: once the score is shown, only the X (and Escape) do anything. */
 document.addEventListener('keydown', function (e) {
