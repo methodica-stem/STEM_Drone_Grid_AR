@@ -14,8 +14,8 @@ approves. In `STEM-Drone-Grid-AR_REVIEW` the proposals are drawn over the pictur
 | | | מקורות מים | مصادر المياه | |
 | | | שבילי גישה למטפלים ומטפלות | مسارات الوصول لطواقم العمل بالمحمية | the picture was regenerated to match the live text (2026-11-12). |
 | | | מתחם תצפית למבקרים ומבקרות | منطقة إطلالة للزوّار والزائرات | changed from نقطة مراقبة by the Arabic reviewer (2026-11-17). |
-| `video-intro-poster.jpg` (poster, shown until the video plays) | 1 | מבצע מיפוי / שמורת שקד / יוצא לדרך! | عمليّة رسم خريطة / محمية اللوز الطبيعيّة / تنطلق! | yes (the same card is in the video) |
-| `video-results-poster.jpg` | 11 | הסריקה הסתיימה ✓ | انتهى المسح ✓ | yes (the same sign is in the video) |
+| `video-intro-poster.jpg` (poster, shown until the video plays) | 1 | מבצע מיפוי / שמורת שקד / יוצא לדרך! | عمليّة رسم خريطة / محمية اللوز الطبيعيّة / تنطلق! | yes (the same card is in the video); the poster is now the first frame of the Arabic video (2026-11-26) |
+| `video-results-poster.jpg` | 11 | הסריקה הסתיימה ✓ | انتهى المسح ✓ | yes (the same sign is in the video); the poster is now the first frame of the Arabic video (2026-11-26) |
 
 Fractions and digits painted in the pictures (`diagram-fixed-pie.png`, the legend values in `q7-img.png`, the grid pictures) are
 numbers: nothing to translate. The corrected diagram on screen 13 is live text over a blank board.
@@ -35,7 +35,7 @@ Set in `index-ar-fixes.py`; the file is in `assets-ar/images/`.
 | `RAHFAN_RESHET_CLIP3_V2.mp4` | 9 (Q5 feedback) | none | — |
 | `RAHFAN_RESHET_CLIP4_V3.mp4` | 11 | the sign "הסריקה הסתיימה ✓" (0:00 to 0:06); the board 0:17 to 0:38: דוח ניתוח שטח השמורה and the four legend lines with 1/2, 1/4, 1/5, 1/10 | انتهى المسح ✓; تقرير تحليل مساحة المحمية; أحراش ونباتات; مصادر المياه; مسارات الوصول لطواقم العمل بالمحمية; منطقة إطلالة للزوّار والزائرات |
 
-The calendar in video 1 shows digits only. The build ships silent same-length placeholders (the poster frame for the whole length);
+The calendar in video 1 shows digits only. 2026-11-26: the four Arabic videos are in (the cards, the paper note, the sign and the board are painted in Arabic in them);
 the studio file is `VIDEO_SCRIPT_AR.docx`.
 
 ## Names and terms (content owner's decisions, 2026-11-12; terms for the reviewer to confirm)
